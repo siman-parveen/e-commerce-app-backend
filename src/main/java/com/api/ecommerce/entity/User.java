@@ -16,6 +16,7 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String userName;
+	private String address;
 	private String isAdmin;
 	
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
@@ -54,11 +55,20 @@ public class User {
 	public void setCart(Cart cart) {
 		this.cart = cart;
 	}
+	
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", userName=" + userName + ", isAdmin=" + isAdmin + ", cart=" + cart + "]";
+		return "User [id=" + id + ", userName=" + userName + ", address=" + address + ", isAdmin=" + isAdmin + ", cart="
+				+ cart + "]";
 	}
-	
 
 }
