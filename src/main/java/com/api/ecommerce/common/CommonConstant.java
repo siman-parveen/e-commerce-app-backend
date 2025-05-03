@@ -21,6 +21,17 @@ public class CommonConstant {
 	public final static String USER_ADDED_SUCCESS = "User registered successfully!!";
 	public final static String USER_UPDATE_SUCCESS = "User information updated successfully!!";
 	public final static String USER_DELETE_SUCCESS = "User removed successfully!!";
+	
+	public static final String CART_RETRIEVED_SUCCESS_FOR_USER = "Cart retrieved successfully for user!!";
+	
+	public static final String ORDERS_RETRIEVED_SUCCESS_FOR_USER = "Orders retrieved successfully for user!!";
+	public static final String ORDER_RETRIEVED_SUCCESS_FOR_USER = "Order retrieved successfully for user!!";
+	public static final String ORDER_CREATED_SUCCESS_FOR_USER = "Order created successfully for user!!";
+	public static final String ORDER_DELETED_SUCCESS_FOR_USER = "Order removed successfully for user!";
+	
+	public static final String ORDER_ITEM_RETRIEVED_SUCCESSFULLY = "Order Item retrieved successfully!!";
+	
+	public static final String PAYMENT_CREATED_SUCCESSFULLY = "Payment posted successfully!!";
 
 	public final static String CALL_FAILED_ON_SERVER = "Call failed on the server!!";
 

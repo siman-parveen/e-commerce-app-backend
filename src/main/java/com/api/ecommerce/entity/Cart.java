@@ -17,7 +17,7 @@ public class Cart {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long entityId;
 	
 	@OneToOne
     @JoinColumn(name = "users_id")
@@ -28,12 +28,12 @@ public class Cart {
 	
 	public Cart() {}
 
-	public Long getId() {
-		return id;
+	public Long getEntityId() {
+		return entityId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setEntityId(Long entityId) {
+		this.entityId = entityId;
 	}
 
 	public User getUser() {
@@ -51,10 +51,5 @@ public class Cart {
 	public void setCartItem(List<CartItem> cartItem) {
 		this.cartItem = cartItem;
 	}
-
-	@Override
-	public String toString() {
-		return "Cart [id=" + id + ", user=" + user + ", cartItem=" + cartItem + "]";
-	}
-
+	
 }

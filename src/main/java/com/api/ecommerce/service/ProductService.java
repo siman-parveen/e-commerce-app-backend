@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
 import com.api.ecommerce.common.CommonService;
+import com.api.ecommerce.dto.request.ProductRequestDTO;
 import com.api.ecommerce.entity.Product;
 import com.api.ecommerce.repo.ProductRepo;
 import com.api.ecommerce.response.Response;
@@ -66,14 +67,15 @@ public class ProductService {
 		return ResponseEntity.ok().body(response);
 	}
 	
-	public ResponseEntity<?> addProduct(Product newProduct) {
+	public ResponseEntity<?> addProduct(ProductRequestDTO productDto) {
 		
 		Response<Product> response = new Response<Product>();
 		try {
-			repo.save(newProduct);
+			Product product = commonService.convertProductRequestDTOToProduct(productDto);
+			repo.save(product);
 			response.setMessage(CommonConstant.PRODUCT_ADDED_SUCCESS);
 			response.setSuccess(true);
-			response.setData(newProduct);
+			response.setData(product);
 		} catch (Exception e) {
 			response.setSuccess(false);
 			response.setMessage(e.getMessage() != null ? e.getMessage() : CommonConstant.CALL_FAILED_ON_SERVER);
@@ -83,27 +85,27 @@ public class ProductService {
 		return ResponseEntity.ok().body(response);
 	}
 	
-	public ResponseEntity<?> updateProduct(Long id, Product updatedProduct) {
+	public ResponseEntity<?> updateProduct(Long id, ProductRequestDTO productDto) {
 		
 		Response<Product> response = new Response<Product>();
 		try {
 			
 			Product product = repo.findById(id).orElseThrow(() -> new RuntimeException(CommonConstant.NO_PRODUCT_FOUND));
 			
-			if(commonService.isUpdated(product.getName(), updatedProduct.getName())) {
-				product.setName(updatedProduct.getName());
+			if(productDto.getProductName() != null && commonService.isUpdated(product.getProductName(), productDto.getProductName())) {
+				product.setProductName(productDto.getProductName());
 			}
 			
-			if(commonService.isUpdated(product.getDescription(), updatedProduct.getDescription())) {
-				product.setDescription(updatedProduct.getDescription());
+			if(productDto.getDescription() != null && commonService.isUpdated(product.getDescription(), productDto.getDescription())) {
+				product.setDescription(productDto.getDescription());
 			}
 			
-			if(commonService.isUpdated(product.getPrice(), updatedProduct.getPrice())) {
-				product.setPrice(updatedProduct.getPrice());
+			if(productDto.getPrice() != null && commonService.isUpdated(product.getPrice(), productDto.getPrice())) {
+				product.setPrice(productDto.getPrice());
 			}
 			
-			if(commonService.isUpdated(product.getStock(), updatedProduct.getStock())) {
-				product.setStock(updatedProduct.getStock());
+			if(productDto.getStock() != null && commonService.isUpdated(product.getStock(), productDto.getStock())) {
+				product.setStock(productDto.getStock());
 			}
 			
 			repo.save(product);

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
 import com.api.ecommerce.common.CommonService;
+import com.api.ecommerce.dto.request.UserRequestDTO;
 import com.api.ecommerce.entity.User;
 import com.api.ecommerce.repo.UserRepo;
 import com.api.ecommerce.response.Response;
@@ -66,14 +67,15 @@ public class UserService {
 		return ResponseEntity.ok().body(response);
 	}
 	
-	public ResponseEntity<?> addUser(User newUser) {
+	public ResponseEntity<?> addUser(UserRequestDTO userDto) {
 		
 		Response<User> response = new Response<User>();
 		try {
-			repo.save(newUser);
+			User user = commonService.convertUserRequestDTOToUser(userDto);
+			repo.save(user);
 			response.setMessage(CommonConstant.USER_ADDED_SUCCESS);
 			response.setSuccess(true);
-			response.setData(newUser);
+			response.setData(user);
 		} catch (Exception e) {
 			response.setSuccess(false);
 			response.setMessage(e.getMessage() != null ? e.getMessage() : CommonConstant.CALL_FAILED_ON_SERVER);
@@ -83,20 +85,20 @@ public class UserService {
 		return ResponseEntity.ok().body(response);
 	}
 	
-	public ResponseEntity<?> updateUserInfo(Long id, User updatedUserInfo) {
+	public ResponseEntity<?> updateUserInfo(Long id, UserRequestDTO userDto) {
 		
 		Response<User> response = new Response<User>();
 		try {
 			
 			User user = repo.findById(id).orElseThrow(() -> new RuntimeException(CommonConstant.NO_USER_FOUND));
 			
-			if(commonService.isUpdated(user.getUserName(), updatedUserInfo.getUserName())) {
-				user.setUserName(updatedUserInfo.getUserName());
+			if(userDto.getUserName() != null && commonService.isUpdated(user.getUserName(), userDto.getUserName())) {
+				user.setUserName(userDto.getUserName());
 			}
 			
-			if(commonService.isUpdated(user.getAddress(), updatedUserInfo.getAddress())) {
-				user.setAddress(updatedUserInfo.getAddress());
-			}
+//			if(userDto.getAddress() != null && commonService.isUpdated(user.getAddress(), userDto.getAddress())) {
+//				user.setAddress(user.getAddress().add(userDto.getAddress()));
+//			}
 			
 			repo.save(user);
 			

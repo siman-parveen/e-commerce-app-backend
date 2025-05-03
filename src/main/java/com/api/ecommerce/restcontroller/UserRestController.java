@@ -11,16 +11,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.api.ecommerce.entity.User;
+import com.api.ecommerce.dto.request.UserRequestDTO;
 import com.api.ecommerce.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "User API", description = "Operations related to E-commerce user")
 public class UserRestController {
 
 	@Autowired
 	private UserService service;
 	
+	@Operation(summary = "Retrieve All Users")
 	@GetMapping
 	public ResponseEntity<?> retrieveAllUsers() {
 		return service.retrieveAllUsers();
@@ -32,12 +37,12 @@ public class UserRestController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<?> addUser(@RequestBody User user) {
+	public ResponseEntity<?> addUser(@RequestBody UserRequestDTO user) {
 		return service.addUser(user);
 	}
 	
 	@PatchMapping("/{userId}")
-	public ResponseEntity<?> updateUserInfo(@PathVariable Long userId, @RequestBody User user) {
+	public ResponseEntity<?> updateUserInfo(@PathVariable Long userId, @RequestBody UserRequestDTO user) {
 		return service.updateUserInfo(userId, user);
 	}
 	

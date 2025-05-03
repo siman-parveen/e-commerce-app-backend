@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.api.ecommerce.entity.Product;
+import com.api.ecommerce.dto.request.ProductRequestDTO;
 import com.api.ecommerce.service.ProductService;
 
 @RestController
@@ -32,12 +32,12 @@ public class ProductRestController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<?> addProduct(@RequestBody Product product) {
+	public ResponseEntity<?> addProduct(@RequestBody ProductRequestDTO product) {
 		return service.addProduct(product);
 	}
 	
 	@PatchMapping("/{productId}")
-	public ResponseEntity<?> updateProduct(@PathVariable Long productId, @RequestBody Product product) {
+	public ResponseEntity<?> updateProduct(@PathVariable Long productId, @RequestBody ProductRequestDTO product) {
 		return service.updateProduct(productId, product);
 	}
 	

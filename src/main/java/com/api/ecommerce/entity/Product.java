@@ -1,10 +1,14 @@
 package com.api.ecommerce.entity;
 
-import jakarta.persistence.Column;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -13,43 +17,43 @@ public class Product {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@Column(nullable = false, length = 30)
-	private String name;
-	
-	@Column(nullable = false)
-	private Double price;
-	
-	@Column(nullable = false, length = 256)
+	private Long entityId;
+	private String externalId;
+	private String productName;
 	private String description; 
+	private Double price;
+	private Integer stock;
 	
-	private Long stock;
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrderItem> orderItems = new ArrayList<OrderItem>();
+	
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Rating> ratings = new ArrayList<Rating>();
 
 	public Product() {}
 
-	public Long getId() {
-		return id;
+	public Long getEntityId() {
+		return entityId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setEntityId(Long entityId) {
+		this.entityId = entityId;
 	}
 
-	public String getName() {
-		return name;
+	public String getExternalId() {
+		return externalId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
 	}
 
-	public Double getPrice() {
-		return price;
+	public String getProductName() {
+		return productName;
 	}
 
-	public void setPrice(Double price) {
-		this.price = price;
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 
 	public String getDescription() {
@@ -60,18 +64,36 @@ public class Product {
 		this.description = description;
 	}
 
-	public Long getStock() {
+	public Double getPrice() {
+		return price;
+	}
+
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
+	public Integer getStock() {
 		return stock;
 	}
 
-	public void setStock(Long stock) {
+	public void setStock(Integer stock) {
 		this.stock = stock;
 	}
 
-	@Override
-	public String toString() {
-		return "Product [id=" + id + ", name=" + name + ", price=" + price + ", description=" + description + ", stock="
-				+ stock + "]";
-	} 
-	
+	public List<OrderItem> getOrderItems() {
+		return orderItems;
+	}
+
+	public void setOrderItems(List<OrderItem> orderItems) {
+		this.orderItems = orderItems;
+	}
+
+	public List<Rating> getRatings() {
+		return ratings;
+	}
+
+	public void setRatings(List<Rating> ratings) {
+		this.ratings = ratings;
+	}
+
 }

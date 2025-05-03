@@ -8,36 +8,54 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class CartItem {
+public class OrderItem {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long entityId;
-	private Integer quantity;
+	private String externalId;
+	private Boolean isDelivered;
 
 	@ManyToOne
-	private Product product;
-
-	@ManyToOne
-    @JoinColumn(name = "cart_id")
-	private Cart cart;
+	@JoinColumn(name = "orders_id")
+	private Order order;
 	
-	public CartItem() {}
+	@ManyToOne
+	@JoinColumn(name = "product_id")
+	private Product product;
+	
+	public OrderItem() {}
 
 	public Long getEntityId() {
 		return entityId;
 	}
-
+	
 	public void setEntityId(Long entityId) {
 		this.entityId = entityId;
 	}
 
-	public Integer getQuantity() {
-		return quantity;
+	public String getExternalId() {
+		return externalId;
 	}
 
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
+
+	public Boolean getIsDelivered() {
+		return isDelivered;
+	}
+
+	public void setIsDelivered(Boolean isDelivered) {
+		this.isDelivered = isDelivered;
+	}
+
+	public Order getOrder() {
+		return order;
+	}
+
+	public void setOrder(Order order) {
+		this.order = order;
 	}
 
 	public Product getProduct() {
@@ -48,12 +66,4 @@ public class CartItem {
 		this.product = product;
 	}
 
-	public Cart getCart() {
-		return cart;
-	}
-
-	public void setCart(Cart cart) {
-		this.cart = cart;
-	}
-	
 }
