@@ -15,6 +15,7 @@ public class OrderItem {
 	private Long entityId;
 	private String externalId;
 	private Boolean isDelivered;
+	private Integer quantity;
 
 	@ManyToOne
 	@JoinColumn(name = "orders_id")
@@ -64,6 +65,14 @@ public class OrderItem {
 
 	public void setProduct(Product product) {
 		this.product = product;
+	}
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
 	}
 
 }

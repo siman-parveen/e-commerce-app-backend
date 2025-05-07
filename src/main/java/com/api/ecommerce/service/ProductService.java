@@ -45,11 +45,11 @@ public class ProductService {
 		return ResponseEntity.ok().body(response);
 	}
 
-	public ResponseEntity<?> retrieveProductById(Long id) {
+	public ResponseEntity<?> retrieveProductById(String productExternalId) {
 		Response<Product> response = new Response<Product>();
 		
 		try {
-			Product product = repo.findById(id).orElseThrow(() -> new RuntimeException(CommonConstant.NO_PRODUCT_FOUND));
+			Product product = commonService.findProductByExternalId(productExternalId);
 			response.setMessage(CommonConstant.RETRIVE_PRODUCT_SUCCESS);
 			response.setSuccess(true);
 			response.setData(product);
@@ -85,12 +85,12 @@ public class ProductService {
 		return ResponseEntity.ok().body(response);
 	}
 	
-	public ResponseEntity<?> updateProduct(Long id, ProductRequestDTO productDto) {
+	public ResponseEntity<?> updateProduct(String productExternalId, ProductRequestDTO productDto) {
 		
 		Response<Product> response = new Response<Product>();
 		try {
 			
-			Product product = repo.findById(id).orElseThrow(() -> new RuntimeException(CommonConstant.NO_PRODUCT_FOUND));
+			Product product = commonService.findProductByExternalId(productExternalId);
 			
 			if(productDto.getProductName() != null && commonService.isUpdated(product.getProductName(), productDto.getProductName())) {
 				product.setProductName(productDto.getProductName());
@@ -127,13 +127,13 @@ public class ProductService {
 		return ResponseEntity.ok().body(response);
 	}
 	
-	public ResponseEntity<?> removeProduct(Long productId) {
+	public ResponseEntity<?> removeProduct(String productExternalId) {
 		
 		
 		Response<Product> response = new Response<Product>();
 		try {
-			repo.findById(productId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_PRODUCT_FOUND));
-			repo.deleteById(productId);
+			Product product = commonService.findProductByExternalId(productExternalId);
+			repo.deleteById(product.getEntityId());
 			response.setMessage(CommonConstant.PRODUCT_DELETE_SUCCESS);
 			response.setSuccess(true);
 			
@@ -149,6 +149,5 @@ public class ProductService {
 		
 		return ResponseEntity.ok().body(response);
 	}
-	
 	
 }

@@ -24,9 +24,9 @@ public class PaymentRequestDTO {
     @Schema(description = "Current status of the payment", allowableValues = {"PENDING", "FAILED", "SUCCESS"})
     private String paymentStatus;
 
-    @NotNull(message = "Order ID is required")
-    @Schema(description = "ID of the associated order")
-    private Long orderId;
+    @NotNull(message = "Order External ID is required")
+    @Schema(description = "External ID of the associated order")
+    private String orderExternalId;
 
 	public PaymentRequestDTO() {}
 
@@ -62,12 +62,12 @@ public class PaymentRequestDTO {
 		this.paymentStatus = paymentStatus;
 	}
 
-	public Long getOrderId() {
-		return orderId;
+	public String getOrderExternalId() {
+		return orderExternalId;
 	}
 
-	public void setOrderId(Long orderId) {
-		this.orderId = orderId;
+	public void setOrderExternalId(String orderExternalId) {
+		this.orderExternalId = orderExternalId;
 	}
 
 }

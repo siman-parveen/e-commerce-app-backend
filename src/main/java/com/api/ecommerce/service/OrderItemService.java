@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
+import com.api.ecommerce.common.CommonService;
+import com.api.ecommerce.entity.Order;
 import com.api.ecommerce.entity.OrderItem;
 import com.api.ecommerce.repo.OrderItemRepo;
 import com.api.ecommerce.response.Response;
@@ -14,12 +16,16 @@ public class OrderItemService {
 	
 	@Autowired
 	private OrderItemRepo repo;
+	
+	@Autowired
+	private CommonService commonService;
 
-	public ResponseEntity<?> retrieveOrderItemForOrder(Long orderId) {
+	public ResponseEntity<?> retrieveOrderItemForOrder(String orderExternalId) {
 		Response<OrderItem> response = new Response<>();
 		
 		try {
-			OrderItem orderItem = repo.findById(orderId).orElseThrow(() -> new RuntimeException("No order item (with given id) found!!"));
+			Order order = commonService.findOrderByExternalId(orderExternalId);
+			OrderItem orderItem = repo.findByOrder(order).orElseThrow(() -> new RuntimeException("No order item (with given id) found!!"));
 			response.setSuccess(true);
 			response.setMessage(CommonConstant.ORDER_ITEM_RETRIEVED_SUCCESSFULLY);
 			response.setData(orderItem);

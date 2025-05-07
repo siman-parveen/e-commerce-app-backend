@@ -18,6 +18,7 @@ public class Cart {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long entityId;
+	private String externalId;
 	
 	@OneToOne
     @JoinColumn(name = "users_id")
@@ -50,6 +51,14 @@ public class Cart {
 
 	public void setCartItem(List<CartItem> cartItem) {
 		this.cartItem = cartItem;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
 	}
 	
 }

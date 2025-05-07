@@ -12,4 +12,5 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
 
 	public Optional<Product> findByExternalId(String productExternalId);
 
+
 }

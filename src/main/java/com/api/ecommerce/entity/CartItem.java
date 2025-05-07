@@ -14,6 +14,7 @@ public class CartItem {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long entityId;
 	private Integer quantity;
+	private String externalId;
 
 	@ManyToOne
 	private Product product;
@@ -54,6 +55,14 @@ public class CartItem {
 
 	public void setCart(Cart cart) {
 		this.cart = cart;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
 	}
 	
 }

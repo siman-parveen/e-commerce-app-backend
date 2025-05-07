@@ -15,21 +15,20 @@ public class CartItemService {
 	@Autowired
 	private CartItemRepo itemRepo;
 
-	public ResponseEntity<?> retrieveCartItems(Long cartItemId) {
+	public ResponseEntity<?> retrieveCartItems(String cartItemExternalId) {
 		
 		Response<CartItem> response = new Response<>();
 		
 		try {
 						
-			CartItem cartItem = itemRepo.findById(cartItemId).orElseThrow(() -> new RuntimeException("Cart item not found!!"));
-			
+			CartItem cartItem = findCartItemByExternalId(cartItemExternalId);
 			response.setSuccess(true);
 			response.setMessage("Cart item retrieved successfully!!");
 			response.setData(cartItem);
 			
 			
 		} catch (RuntimeException e) {
-			response.setSuccess(true);
+			response.setSuccess(false);
 			response.setMessage(e.getMessage());
 		}
 		catch (Exception e) {
@@ -42,12 +41,18 @@ public class CartItemService {
 		return ResponseEntity.ok().body(response);	
 	}
 
-	public ResponseEntity<?> addQuantityForCartItem(Long cartItemId, int quantity) {
+	public ResponseEntity<?> addQuantityForCartItem(String cartItemExternalId, int quantity) {
 		Response<CartItem> response = new Response<>();
 		
 		try {
+			
+			if(quantity < 1) {
+				response.setSuccess(false);
+				response.setMessage("Item quantity must be greater than 1");
+				return ResponseEntity.ok().body(response);
+			}
 						
-			CartItem cartItem = itemRepo.findById(cartItemId).orElseThrow(() -> new RuntimeException("Cart item not found!!"));
+			CartItem cartItem = findCartItemByExternalId(cartItemExternalId);
 			
 			cartItem.setQuantity(cartItem.getQuantity() + quantity);
 			
@@ -59,7 +64,7 @@ public class CartItemService {
 			
 			
 		} catch (RuntimeException e) {
-			response.setSuccess(true);
+			response.setSuccess(false);
 			response.setMessage(e.getMessage());
 		}
 		catch (Exception e) {
@@ -72,12 +77,18 @@ public class CartItemService {
 		return ResponseEntity.ok().body(response);	
 	}
 
-	public ResponseEntity<?> removeQuantityForCartItem(Long cartItemId, int quantity) {
+	public ResponseEntity<?> removeQuantityForCartItem(String cartItemExternalId, int quantity) {
 		Response<CartItem> response = new Response<>();
 		
 		try {
+			
+			if(quantity < 1) {
+				response.setSuccess(false);
+				response.setMessage("Item quantity must be greater than 1");
+				return ResponseEntity.ok().body(response);
+			}
 						
-			CartItem cartItem = itemRepo.findById(cartItemId).orElseThrow(() -> new RuntimeException("Cart item not found!!"));
+			CartItem cartItem = findCartItemByExternalId(cartItemExternalId);
 
 			if((cartItem.getQuantity() - quantity) <= 0) {
 				cartItem.setQuantity(0);
@@ -93,7 +104,7 @@ public class CartItemService {
 			
 			
 		} catch (RuntimeException e) {
-			response.setSuccess(true);
+			response.setSuccess(false);
 			response.setMessage(e.getMessage());
 		}
 		catch (Exception e) {
@@ -106,20 +117,20 @@ public class CartItemService {
 		return ResponseEntity.ok().body(response);
 	}
 	
-	public ResponseEntity<?> removeCartItem(Long cartItemId) {
+	public ResponseEntity<?> removeCartItem(String cartItemExternalId) {
 		Response<CartItem> response = new Response<>();
 		
 		try {
 						
-			CartItem cartItem = itemRepo.findById(cartItemId).orElseThrow(() -> new RuntimeException("Cart item not found!!"));
+			CartItem cartItem = findCartItemByExternalId(cartItemExternalId);
 
-			itemRepo.delete(cartItem);
+			itemRepo.deleteById(cartItem.getEntityId());
 			
 			response.setSuccess(true);
 			response.setMessage("Cart item removed successfully!!");			
 			
 		} catch (RuntimeException e) {
-			response.setSuccess(true);
+			response.setSuccess(false);
 			response.setMessage(e.getMessage());
 		}
 		catch (Exception e) {
@@ -130,5 +141,9 @@ public class CartItemService {
 		}
 		
 		return ResponseEntity.ok().body(response);
+	}
+	
+	private CartItem findCartItemByExternalId(String cartItemExternalId){
+		return itemRepo.findByExternalId(cartItemExternalId).orElseThrow(() -> new RuntimeException("Cart item not found!!"));
 	}
 }

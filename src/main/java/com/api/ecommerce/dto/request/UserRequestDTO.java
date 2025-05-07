@@ -3,15 +3,10 @@ package com.api.ecommerce.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class UserRequestDTO {
-	
-	@NotBlank(message = "User External ID is required")
-    @Schema(description = "Unique external identifier for the user")
-    private String userExternalId;
 
     @Size(max = 50, message = "Username must not exceed 50 characters")
     @Schema(description = "User's display or login name", nullable = true)
@@ -30,14 +25,6 @@ public class UserRequestDTO {
     private AddressRequestDTO address;
 	
 	public UserRequestDTO() {}
-
-	public String getUserExternalId() {
-		return userExternalId;
-	}
-
-	public void setUserExternalId(String userExternalId) {
-		this.userExternalId = userExternalId;
-	}
 
 	public String getUserName() {
 		return userName;

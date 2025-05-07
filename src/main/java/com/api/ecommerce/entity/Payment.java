@@ -2,12 +2,7 @@ package com.api.ecommerce.entity;
 
 import java.time.LocalDateTime;
 
-import com.api.ecommerce.common.PaymentMode;
-import com.api.ecommerce.common.PaymentStatus;
-
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,11 +19,9 @@ public class Payment {
     private Double totalAmount;
 	private LocalDateTime paymentDate;
 	
-	@Enumerated(EnumType.STRING)
-	private PaymentMode paymentMode;
+	private String paymentMode;
 	
-	@Enumerated(EnumType.STRING)
-	private PaymentStatus paymentStatus;
+	private String paymentStatus;
     
     @ManyToOne
     @JoinColumn(name = "orders_id")
@@ -68,19 +61,19 @@ public class Payment {
 		this.paymentDate = paymentDate;
 	}
 
-	public PaymentMode getPaymentMode() {
+	public String getPaymentMode() {
 		return paymentMode;
 	}
 
-	public void setPaymentMode(PaymentMode paymentMode) {
+	public void setPaymentMode(String paymentMode) {
 		this.paymentMode = paymentMode;
 	}
 
-	public PaymentStatus getPaymentStatus() {
+	public String getPaymentStatus() {
 		return paymentStatus;
 	}
 
-	public void setPaymentStatus(PaymentStatus paymentStatus) {
+	public void setPaymentStatus(String paymentStatus) {
 		this.paymentStatus = paymentStatus;
 	}
 

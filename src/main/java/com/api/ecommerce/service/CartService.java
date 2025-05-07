@@ -8,13 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
+import com.api.ecommerce.common.CommonService;
 import com.api.ecommerce.entity.Cart;
 import com.api.ecommerce.entity.CartItem;
 import com.api.ecommerce.entity.Product;
 import com.api.ecommerce.entity.User;
 import com.api.ecommerce.repo.CartRepo;
-import com.api.ecommerce.repo.ProductRepo;
-import com.api.ecommerce.repo.UserRepo;
 import com.api.ecommerce.response.Response;
 
 @Service
@@ -24,17 +23,14 @@ public class CartService {
 	private CartRepo cartRepo;
 	
 	@Autowired
-	private UserRepo userRepo;
-	
-	@Autowired
-	private ProductRepo productRepo;
+	private CommonService commonService;
 
-	public ResponseEntity<?> retrieveCartForUser(Long userId) {
+	public ResponseEntity<?> retrieveCartForUser(String userExternalId) {
 		
 		Response<Cart> response = new Response<Cart>();
 		
 		try {
-			User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_USER_FOUND));
+			User user = commonService.findUserByExternalId(userExternalId);
 
 			Cart cart = cartRepo.findByUser(user).orElseThrow(() -> new RuntimeException("No cart found for the user!!"));
 			response.setSuccess(true);
@@ -53,14 +49,14 @@ public class CartService {
 		return ResponseEntity.ok().body(response);	
 	}
 
-	public ResponseEntity<?> addItemToCart(Long userId, String productExternalId, Integer quantity) {
+	public ResponseEntity<?> addItemToCart(String userExternalId, String productExternalId, Integer quantity) {
 		Response<Cart> response = new Response<Cart>();
 		
 		try {
 			
-			User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_USER_FOUND));
+			User user = commonService.findUserByExternalId(userExternalId);
 			
-			Product product = productRepo.findByExternalId(productExternalId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_PRODUCT_FOUND));
+			Product product = commonService.findProductByExternalId(productExternalId);
 			
 			Cart cart = cartRepo.findByUser(user).orElseGet(() -> {
 				Cart newCart = new Cart();
@@ -70,7 +66,7 @@ public class CartService {
 			});
 			
 			 Optional<CartItem> existingCartItem = cart.getCartItem().stream()
-					 .filter(item -> item.getProduct().getEntityId().equals(productExternalId)).findFirst();
+					 .filter(item -> item.getProduct().getEntityId().equals(product.getEntityId())).findFirst();
 			 
 			 CartItem cartItem;
 			 
@@ -106,13 +102,13 @@ public class CartService {
 	}
 	
 	
-	public ResponseEntity<?> clearCart(Long userId){
+	public ResponseEntity<?> clearCart(String userExternalId){
 		
 		Response<Cart> response = new Response<Cart>();
 		
 		try {
 			
-			User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_USER_FOUND));
+			User user = commonService.findUserByExternalId(userExternalId);
 			
 			Cart cart = cartRepo.findByUser(user).orElseThrow(() -> new RuntimeException("No cart found for the user!!"));
 			cart.getCartItem().clear();

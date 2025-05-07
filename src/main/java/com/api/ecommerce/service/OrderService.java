@@ -7,26 +7,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
+import com.api.ecommerce.common.CommonService;
+import com.api.ecommerce.dto.request.OrderRequestDTO;
+import com.api.ecommerce.dto.response.OrderResponseDTO;
 import com.api.ecommerce.entity.Order;
 import com.api.ecommerce.entity.User;
 import com.api.ecommerce.repo.OrderRepo;
-import com.api.ecommerce.repo.UserRepo;
 import com.api.ecommerce.response.Response;
+
+import jakarta.validation.Valid;
 
 @Service
 public class OrderService {
-	
-	@Autowired
-	private UserRepo userRepo;
-	
+
 	@Autowired
 	private OrderRepo orderRepo;
+	
+	@Autowired
+	private CommonService commonService;
 
-	public ResponseEntity<?> retrieveOrdersForUser(Long userId) {
+	public ResponseEntity<?> retrieveOrdersForUser(String userExternalId) {
 		Response<List<Order>> response = new Response<>();
 		
 		try {
-			User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_USER_FOUND));
+			User user = commonService.findUserByExternalId(userExternalId);
 
 			List<Order> orders = orderRepo.findByUser(user).orElseThrow(() -> new RuntimeException("No orders found for the user!!"));
 			response.setSuccess(true);
@@ -45,11 +49,11 @@ public class OrderService {
 		return ResponseEntity.ok().body(response);	
 	}
 
-	public ResponseEntity<?> retrieveOrder(Long orderId) {
+	public ResponseEntity<?> retrieveOrder(String orderExternalId) {
 		Response<Order> response = new Response<>();
 		
 		try {
-			Order order = orderRepo.findById(orderId).orElseThrow(() -> new RuntimeException("No order (with given id) found for the user!!"));
+			Order order = commonService.findOrderByExternalId(orderExternalId);
 			response.setSuccess(true);
 			response.setMessage(CommonConstant.ORDER_RETRIEVED_SUCCESS_FOR_USER);
 			response.setData(order);
@@ -66,20 +70,22 @@ public class OrderService {
 		return ResponseEntity.ok().body(response);
 	}
 
-	public ResponseEntity<?> createOrderForUser(Long userId, Order order) {
-		Response<Order> response = new Response<>();
+	public ResponseEntity<?> createOrderForUser(String userExternalId, @Valid OrderRequestDTO orderRqst) {
+		Response<OrderResponseDTO> response = new Response<>();
 		
 		try {
-			User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_USER_FOUND));
 			
-			order.setUser(user);
-			//need to add order item
+			Order order = commonService.convertOrderRequestDtoToOrder(orderRqst);
 			
 			orderRepo.save(order);
 			
+			orderRqst.getOrderItems().stream().forEach(item -> {
+				commonService.convertProductQuantityRequestDtoToOrderItem(item, order);
+			});
+			
 			response.setSuccess(true);
 			response.setMessage(CommonConstant.ORDER_CREATED_SUCCESS_FOR_USER);
-			response.setData(order);
+			response.setData(commonService.convertOrderToOrderResponseDto(order));
 		} catch (RuntimeException e) {
 			response.setSuccess(true);
 			response.setMessage(e.getMessage());
@@ -93,12 +99,12 @@ public class OrderService {
 		return ResponseEntity.ok().body(response);
 	}
 
-	public ResponseEntity<?> removeOrder(Long orderId) {
+	public ResponseEntity<?> removeOrder(String orderExternalId) {
 		Response<Order> response = new Response<>();
 		
 		try {
-			orderRepo.findById(orderId).orElseThrow(() -> new RuntimeException("No order (with given id) found for the user!!"));
-			orderRepo.deleteById(orderId);
+			Order order = commonService.findOrderByExternalId(orderExternalId);
+			orderRepo.deleteById(order.getEntityId());
 			response.setSuccess(true);
 			response.setMessage(CommonConstant.ORDER_DELETED_SUCCESS_FOR_USER);
 		} catch (RuntimeException e) {
