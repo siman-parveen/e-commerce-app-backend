@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.dto.request.OrderRequestDTO;
@@ -25,6 +26,7 @@ import com.api.ecommerce.entity.Payment;
 import com.api.ecommerce.entity.Product;
 import com.api.ecommerce.entity.User;
 import com.api.ecommerce.entity.UserAddress;
+import com.api.ecommerce.exception.ApiException;
 import com.api.ecommerce.repo.OrderRepo;
 import com.api.ecommerce.repo.ProductRepo;
 import com.api.ecommerce.repo.UserAddressRepo;
@@ -50,19 +52,19 @@ public class CommonService {
 	}
 	
 	public Product findProductByExternalId(String productExternalId) {
-		return productRepo.findByExternalId(productExternalId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_PRODUCT_FOUND));
+		return productRepo.findByExternalId(productExternalId).orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR,CommonConstant.NO_PRODUCT_FOUND));
 	}
 	
 	public User findUserByExternalId(String userExternalId) {
-		return userRepo.findByExternalId(userExternalId).orElseThrow(() -> new RuntimeException(CommonConstant.NO_USER_FOUND));
+		return userRepo.findByExternalId(userExternalId).orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR,CommonConstant.NO_USER_FOUND));
 	}
 	
 	public UserAddress findUserAddressByExternalId(String userAddressExternalId) {
-		return addressRepo.findByExternalId(userAddressExternalId).orElseThrow(() -> new RuntimeException("User Address not found!!"));
+		return addressRepo.findByExternalId(userAddressExternalId).orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR,"User Address not found!!"));
 	}
 	
 	public Order findOrderByExternalId(String orderExternalId) {
-		return orderRepo.findByExternalId(orderExternalId).orElseThrow(() -> new RuntimeException("No order (with given id) found!!"));
+		return orderRepo.findByExternalId(orderExternalId).orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR,"No order (with given id) found!!"));
 	}
 
 	public Product convertProductRequestDTOToProduct(ProductRequestDTO productDto) {
