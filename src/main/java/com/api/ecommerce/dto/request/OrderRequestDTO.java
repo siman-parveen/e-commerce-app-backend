@@ -1,6 +1,6 @@
 package com.api.ecommerce.dto.request;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,23 +13,15 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 public class OrderRequestDTO {
-	
-	@NotBlank(message = "External ID is required")
-    @Schema(description = "External reference ID for the order")
-    private String externalId;
 
     @NotNull(message = "Total amount is required")
     @Positive(message = "Total amount must be greater than 0")
     @Schema(description = "Total order amount before deductions")
-    private Double totalAmount;
+    private BigDecimal totalAmount;
 
     @PositiveOrZero(message = "Deductions must be zero or positive")
     @Schema(description = "Total deduction amount applied")
-    private Double deductions;
-
-    @NotNull(message = "Order date is required")
-    @Schema(description = "Date and time when the order was placed")
-    private LocalDateTime orderDate;
+    private BigDecimal deductions;
 
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Phone number must be valid E.164 format")
@@ -51,36 +43,20 @@ public class OrderRequestDTO {
 
 	public OrderRequestDTO() {}
 
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public Double getTotalAmount() {
+	public BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
 
-	public void setTotalAmount(Double totalAmount) {
+	public void setTotalAmount(BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 
-	public Double getDeductions() {
+	public BigDecimal getDeductions() {
 		return deductions;
 	}
 
-	public void setDeductions(Double deductions) {
+	public void setDeductions(BigDecimal deductions) {
 		this.deductions = deductions;
-	}
-
-	public LocalDateTime getOrderDate() {
-		return orderDate;
-	}
-
-	public void setOrderDate(LocalDateTime orderDate) {
-		this.orderDate = orderDate;
 	}
 
 	public String getPhoneNumber() {

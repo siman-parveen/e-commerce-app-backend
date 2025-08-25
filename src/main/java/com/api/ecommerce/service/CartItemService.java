@@ -1,12 +1,12 @@
 package com.api.ecommerce.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.entity.CartItem;
-import com.api.ecommerce.exception.ApiException;
 import com.api.ecommerce.repo.CartItemRepo;
 import com.api.ecommerce.response.Response;
 
@@ -21,6 +21,13 @@ public class CartItemService {
 		Response<CartItem> response = new Response<>();
 				
 		CartItem cartItem = findCartItemByExternalId(cartItemExternalId);
+		
+		if(cartItem == null) {
+			response.setSuccess(false);
+			response.setMessage("Cart Item not found!!");
+			return ResponseEntity.ok().body(response);
+		}
+		
 		response.setSuccess(true);
 		response.setMessage("Cart item retrieved successfully!!");
 		response.setData(cartItem);
@@ -38,6 +45,12 @@ public class CartItemService {
 		}
 					
 		CartItem cartItem = findCartItemByExternalId(cartItemExternalId);
+		
+		if(cartItem == null) {
+			response.setSuccess(false);
+			response.setMessage("Cart Item not found!!");
+			return ResponseEntity.ok().body(response);
+		}
 		
 		cartItem.setQuantity(cartItem.getQuantity() + quantity);
 		
@@ -60,9 +73,20 @@ public class CartItemService {
 		}
 					
 		CartItem cartItem = findCartItemByExternalId(cartItemExternalId);
+		
+		if(cartItem == null) {
+			response.setSuccess(false);
+			response.setMessage("Cart Item not found!!");
+			return ResponseEntity.ok().body(response);
+		}
 
 		if((cartItem.getQuantity() - quantity) <= 0) {
-			cartItem.setQuantity(0);
+			
+			itemRepo.deleteById(cartItem.getEntityId());
+			response.setSuccess(false);
+			response.setMessage("Cart item removed!!");
+			return ResponseEntity.ok().body(response);
+			
 		}else {
 			cartItem.setQuantity(cartItem.getQuantity() - quantity);
 		}
@@ -80,6 +104,12 @@ public class CartItemService {
 		Response<CartItem> response = new Response<>();
 					
 		CartItem cartItem = findCartItemByExternalId(cartItemExternalId);
+		
+		if(cartItem == null) {
+			response.setSuccess(false);
+			response.setMessage("Cart Item not found!!");
+			return ResponseEntity.ok().body(response);
+		}
 
 		itemRepo.deleteById(cartItem.getEntityId());
 		
@@ -90,6 +120,12 @@ public class CartItemService {
 	}
 	
 	private CartItem findCartItemByExternalId(String cartItemExternalId){
-		return itemRepo.findByExternalId(cartItemExternalId).orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Cart item not found!!"));
+		Optional<CartItem> cartItem = itemRepo.findByExternalId(cartItemExternalId);
+		
+		if(cartItem.isEmpty()) {
+			return null;
+		}
+		
+		return cartItem.get();
 	}
 }

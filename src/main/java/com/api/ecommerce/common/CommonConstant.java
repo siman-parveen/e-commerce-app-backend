@@ -34,5 +34,8 @@ public class CommonConstant {
 	public static final String PAYMENT_CREATED_SUCCESSFULLY = "Payment posted successfully!!";
 
 	public final static String CALL_FAILED_ON_SERVER = "Call failed on the server!!";
+	
+	public static final String PRODUCT_CANNOT_BE_NULL = "Product cannot be null!!";
+	public static final String ORDER_CANNOT_BE_NULL = "Order cannot be null!!";
 
 }

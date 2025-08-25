@@ -1,5 +1,6 @@
 package com.api.ecommerce.dto.response;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class CartResponseDTO {
@@ -8,7 +9,7 @@ public class CartResponseDTO {
 	private String userExternalId;
 	private List<CartItemResponseDTO> cartItemResponseDto;
 	private int cartItemCount;
-	private double totalAmount;
+	private BigDecimal totalAmount;
 	
 	public CartResponseDTO() {}
 	
@@ -36,10 +37,10 @@ public class CartResponseDTO {
 	public void setCartItemCount(int cartItemCount) {
 		this.cartItemCount = cartItemCount;
 	}
-	public double getTotalAmount() {
+	public BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
-	public void setTotalAmount(double totalAmount) {
+	public void setTotalAmount(BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 	

@@ -1,15 +1,18 @@
 package com.api.ecommerce.entity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.PositiveOrZero;
 
 @Entity
 @Table(name = "products")
@@ -18,17 +21,28 @@ public class Product {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long entityId;
+	
+	@Column(nullable = false, unique = true)
 	private String externalId;
+	
+	@Column(nullable = false)
 	private String productName;
-	private String description; 
-	private Double price;
+	
+	@Column(nullable = false)
+	private String description;
+	
+	@Column(precision = 10, scale = 2, nullable = false)
+	private BigDecimal price;
+	
+	@PositiveOrZero
+	@Column(nullable = false)
 	private Integer stock;
 	
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OrderItem> orderItems = new ArrayList<OrderItem>();
 	
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Rating> ratings = new ArrayList<Rating>();
+	private List<Review> reviews = new ArrayList<Review>();
 
 	public Product() {}
 
@@ -64,11 +78,11 @@ public class Product {
 		this.description = description;
 	}
 
-	public Double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(Double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -88,12 +102,12 @@ public class Product {
 		this.orderItems = orderItems;
 	}
 
-	public List<Rating> getRatings() {
-		return ratings;
+	public List<Review> getReviews() {
+		return reviews;
 	}
 
-	public void setRatings(List<Rating> ratings) {
-		this.ratings = ratings;
+	public void setReviews(List<Review> reviews) {
+		this.reviews = reviews;
 	}
 
 }

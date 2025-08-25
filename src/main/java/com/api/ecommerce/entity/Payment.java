@@ -1,8 +1,13 @@
 package com.api.ecommerce.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,18 +18,28 @@ import jakarta.persistence.ManyToOne;
 public class Payment {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long entityId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long entityId;
+
+	@Column(nullable = false, unique = true)
     private String transactionId;
-    private Double totalAmount;
-	private LocalDateTime paymentDate;
-	
-	private String paymentMode;
-	
-	private String paymentStatus;
-    
-    @ManyToOne
-    @JoinColumn(name = "orders_id")
+
+    @Column(precision = 10, scale = 2, nullable = false)
+    private BigDecimal totalAmount;
+
+    @Column(nullable = false)
+    private LocalDateTime paymentDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMode paymentMode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
 	public Payment() {}
@@ -45,11 +60,19 @@ public class Payment {
 		this.transactionId = transactionId;
 	}
 
-	public Double getTotalAmount() {
+	public Order getOrder() {
+		return order;
+	}
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
+
+	public BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
 
-	public void setTotalAmount(Double totalAmount) {
+	public void setTotalAmount(BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 
@@ -61,28 +84,20 @@ public class Payment {
 		this.paymentDate = paymentDate;
 	}
 
-	public String getPaymentMode() {
+	public PaymentMode getPaymentMode() {
 		return paymentMode;
 	}
 
-	public void setPaymentMode(String paymentMode) {
+	public void setPaymentMode(PaymentMode paymentMode) {
 		this.paymentMode = paymentMode;
 	}
 
-	public String getPaymentStatus() {
+	public PaymentStatus getPaymentStatus() {
 		return paymentStatus;
 	}
 
-	public void setPaymentStatus(String paymentStatus) {
-		this.paymentStatus = paymentStatus;
-	}
-
-	public Order getOrder() {
-		return order;
-	}
-
-	public void setOrder(Order order) {
-		this.order = order;
+	public void setPaymentStatus(PaymentStatus paymentStatus2) {
+		this.paymentStatus = paymentStatus2;
 	}
  
 }

@@ -1,15 +1,18 @@
 package com.api.ecommerce.dto.response;
 
+import java.util.List;
+
 public class UserResponseDTO {
 	
     private String userExternalId;
     private String userName;
     private String emailId;
     private String phoneNumber;
-    private int addressCount;
+    private List<AddressResponseDTO> address;
+	private int addressCount;
     private int ordersCount;
     private int cartItemsCount;
-    private int ratingsCount;
+    private int reviewsCount;
     
     public UserResponseDTO() {}
     
@@ -55,11 +58,24 @@ public class UserResponseDTO {
 	public void setCartItemsCount(int cartItemsCount) {
 		this.cartItemsCount = cartItemsCount;
 	}
-	public int getRatingsCount() {
-		return ratingsCount;
+	
+
+	public List<AddressResponseDTO> getAddress() {
+		return address;
 	}
-	public void setRatingsCount(int ratingsCount) {
-		this.ratingsCount = ratingsCount;
+
+	public void setAddress(List<AddressResponseDTO> address) {
+		this.address = address;
 	}
+
+	public int getReviewsCount() {
+		return reviewsCount;
+	}
+
+	public void setReviewsCount(int reviewsCount) {
+		this.reviewsCount = reviewsCount;
+	}
+	 
+	
 
 }

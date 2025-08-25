@@ -45,7 +45,7 @@ public class CartRestController {
 	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
 	})
 	@PostMapping
-	public ResponseEntity<?> addItemToCart(@PathVariable String userExternalId, @RequestBody @Valid ProductQuantityRequestDTO product) {
+	public ResponseEntity<?> addItemToCart(@PathVariable String userExternalId, @Valid @RequestBody ProductQuantityRequestDTO product) {
 		return service.addItemToCart(userExternalId, product.getProductExternalId(), product.getQuantity());
 		
 	}

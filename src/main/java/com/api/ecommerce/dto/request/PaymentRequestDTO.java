@@ -1,6 +1,12 @@
 package com.api.ecommerce.dto.request;
 
+import java.math.BigDecimal;
+
+import com.api.ecommerce.entity.PaymentMode;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -14,18 +20,15 @@ public class PaymentRequestDTO {
     @NotNull(message = "Total amount is required")
     @Positive(message = "Amount must be greater than 0")
     @Schema(description = "Total amount paid")
-    private Double totalAmount;
+    private BigDecimal totalAmount;
 
     @NotNull(message = "Payment mode is required")
-    @Schema(description = "Mode of payment", allowableValues = {"CREDIT_CARD", "DEBIT_CARD", "UPI", "NET_BANKING", "WALLET"})
-    private String paymentMode;
-
-    @NotNull(message = "Payment status is required")
-    @Schema(description = "Current status of the payment", allowableValues = {"PENDING", "FAILED", "SUCCESS"})
-    private String paymentStatus;
-
-    @NotNull(message = "Order External ID is required")
-    @Schema(description = "External ID of the associated order")
+    @Enumerated(EnumType.STRING)
+    @Schema(description = "Mode of payment", allowableValues = {"CASH", "CARD", "CHECK", "UPI", "NETBANKING"})
+    private PaymentMode paymentMode;
+    
+    @NotBlank(message = "Order External ID is required")
+    @Schema(description = "External ID of the order")
     private String orderExternalId;
 
 	public PaymentRequestDTO() {}
@@ -38,28 +41,20 @@ public class PaymentRequestDTO {
 		this.transactionId = transactionId;
 	}
 
-	public Double getTotalAmount() {
+	public BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
 
-	public void setTotalAmount(Double totalAmount) {
+	public void setTotalAmount(BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 
-	public String getPaymentMode() {
+	public PaymentMode getPaymentMode() {
 		return paymentMode;
 	}
 
-	public void setPaymentMode(String paymentMode) {
+	public void setPaymentMode(PaymentMode paymentMode) {
 		this.paymentMode = paymentMode;
-	}
-
-	public String getPaymentStatus() {
-		return paymentStatus;
-	}
-
-	public void setPaymentStatus(String paymentStatus) {
-		this.paymentStatus = paymentStatus;
 	}
 
 	public String getOrderExternalId() {
@@ -69,5 +64,5 @@ public class PaymentRequestDTO {
 	public void setOrderExternalId(String orderExternalId) {
 		this.orderExternalId = orderExternalId;
 	}
-
+	
 }

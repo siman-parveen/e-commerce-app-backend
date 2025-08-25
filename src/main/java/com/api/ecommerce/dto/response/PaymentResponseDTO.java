@@ -1,11 +1,13 @@
 package com.api.ecommerce.dto.response;
 
+import java.math.BigDecimal;
+
 public class PaymentResponseDTO {
 	
 	private String transactionId;
 	private String paymentMethod;
 	private String paymentStatus;
-	private double totalAmount;
+	private BigDecimal totalAmount;
 	private String orderExternalId;
 	
 	public PaymentResponseDTO() {}
@@ -28,10 +30,10 @@ public class PaymentResponseDTO {
 	public void setPaymentStatus(String paymentStatus) {
 		this.paymentStatus = paymentStatus;
 	}
-	public double getTotalAmount() {
+	public BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
-	public void setTotalAmount(double totalAmount) {
+	public void setTotalAmount(BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 	public String getOrderExternalId() {

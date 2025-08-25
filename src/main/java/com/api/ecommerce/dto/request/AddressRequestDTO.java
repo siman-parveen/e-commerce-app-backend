@@ -1,49 +1,39 @@
 package com.api.ecommerce.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class AddressRequestDTO {
-	
-	@NotBlank(message = "Address External ID is required")
-    @Schema(description = "Unique external ID of the address")
-    private String addressExternalId;
 
     @Size(max = 10, message = "Address Name cannot exceed 10 characters")
-    @Schema(description = "Name of the address", nullable = true)
+    @Schema(description = "Name of the address")
     private String addressName;
 
     @Size(max = 256, message = "Address Line cannot exceed 256 characters")
-    @Schema(description = "Street address or detailed address line", nullable = true)
+    @Schema(description = "Street address or detailed address line")
     private String addressLine;
 
     @Size(max = 100, message = "City name cannot exceed 100 characters")
-    @Schema(description = "City name", nullable = true)
+    @Schema(description = "City name")
     private String city;
 
     @Size(max = 100, message = "State name cannot exceed 100 characters")
-    @Schema(description = "State name", nullable = true)
+    @Schema(description = "State name")
     private String state;
 
     @Pattern(regexp = "^[0-9]{5,6}$", message = "Pincode must be 5 or 6 digits")
-    @Schema(description = "Postal code / ZIP", nullable = true)
+    @Schema(description = "Postal code / ZIP")
     private String pincode;
 
     @Size(max = 100, message = "Country name cannot exceed 100 characters")
-    @Schema(description = "Country name", nullable = true)
+    @Schema(description = "Country name")
     private String country;
+    
+    @Schema(description = "User External Id")
+    private String userExternalId;
 	
 	public AddressRequestDTO() {}
-
-	public String getAddressExternalId() {
-		return addressExternalId;
-	}
-
-	public void setAddressExternalId(String addressExternalId) {
-		this.addressExternalId = addressExternalId;
-	}
 
 	public String getAddressName() {
 		return addressName;
@@ -92,5 +82,22 @@ public class AddressRequestDTO {
 	public void setCountry(String country) {
 		this.country = country;
 	}
+
+	public String getUserExternalId() {
+		return userExternalId;
+	}
+
+	public void setUserExternalId(String userExternalId) {
+		this.userExternalId = userExternalId;
+	}
+
+//	@Override
+//	public String toString() {
+//		return "AddressRequestDTO [addressName=" + addressName + ", addressLine=" + addressLine + ", city=" + city
+//				+ ", state=" + state + ", pincode=" + pincode + ", country=" + country + ", userExternalId="
+//				+ userExternalId + "]";
+//	}
+	
+	
 	
 }

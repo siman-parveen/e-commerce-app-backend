@@ -86,7 +86,7 @@ public class GlobalExceptionHandler {
     // 10. Catch-All Handler
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleAll(Exception ex) {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, CommonConstant.CALL_FAILED_ON_SERVER + " Unexpected error: " + ex.getMessage());
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, CommonConstant.CALL_FAILED_ON_SERVER);
     }
 
     // Utility method for building response

@@ -1,5 +1,6 @@
 package com.api.ecommerce.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class OrderItemResponseDTO {
@@ -7,9 +8,8 @@ public class OrderItemResponseDTO {
 	private String orderItemExternalId;
 	private String productName;
 	private int quantity;
-	private double productPrice;
-	private double discountAmount;
-	private boolean isDelivered;
+	private BigDecimal productPrice;
+	private BigDecimal discountAmount;
 	private LocalDateTime deliveredDate;
 	
 	public OrderItemResponseDTO() {}
@@ -38,28 +38,20 @@ public class OrderItemResponseDTO {
 		this.quantity = quantity;
 	}
 
-	public double getProductPrice() {
+	public BigDecimal getProductPrice() {
 		return productPrice;
 	}
 
-	public void setProductPrice(double productPrice) {
+	public void setProductPrice(BigDecimal productPrice) {
 		this.productPrice = productPrice;
 	}
 
-	public double getDiscountAmount() {
+	public BigDecimal getDiscountAmount() {
 		return discountAmount;
 	}
 
-	public void setDiscountAmount(double discountAmount) {
+	public void setDiscountAmount(BigDecimal discountAmount) {
 		this.discountAmount = discountAmount;
-	}
-
-	public boolean isDelivered() {
-		return isDelivered;
-	}
-
-	public void setDelivered(boolean isDelivered) {
-		this.isDelivered = isDelivered;
 	}
 
 	public LocalDateTime getDeliveredDate() {

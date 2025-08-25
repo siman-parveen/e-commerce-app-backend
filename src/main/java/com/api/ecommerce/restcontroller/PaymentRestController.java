@@ -3,6 +3,7 @@ package com.api.ecommerce.restcontroller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +29,7 @@ public class PaymentRestController {
 	@Autowired
 	private PaymentService service;
 	
-	@Operation(summary = "Retrieve Payment for a specific order", description = "API returns the payment made by the user to a specific order")
+	@Operation(summary = "Make Payment for a specific order", description = "API returns the payment made by the user to a specific order")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "Payment retrieved successfully for the order!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = PaymentResponseDTO.class))),
 	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
@@ -36,6 +37,16 @@ public class PaymentRestController {
 	@PostMapping("/api/user/order/{orderExternalId}/payment")
 	public ResponseEntity<?> makePaymentForOrder(@PathVariable String orderExternalId, @Valid @RequestBody PaymentRequestDTO payment) {
 		return service.makePaymentForOrder(orderExternalId, payment);
+	}
+	
+	@Operation(summary = "Retrieve Payment for a specific order", description = "API returns the payment made by the user to a specific order")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "Payment retrieved successfully for the order!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = PaymentResponseDTO.class))),
+	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
+	})
+	@GetMapping("/api/user/order/{orderExternalId}/payment")
+	public ResponseEntity<?> retrievePaymentForOrderForUser(@PathVariable String orderExternalId) {
+		return service.retrievePaymentForOrder(orderExternalId);
 	}
 	
 	@Operation(summary = "Retrieve All Payments", description = "API returns the all the payments that are made by the users")
@@ -46,6 +57,16 @@ public class PaymentRestController {
 	@GetMapping("/api/admin/payments")
 	public ResponseEntity<?> retrieveAllPayments() {
 		return service.retrieveAllPayments();
+	}
+	
+	@PatchMapping("/api/user/order/{orderExternalId}/refund/payment")
+	public ResponseEntity<?> refundPaymentByOrderExternalId(@PathVariable String orderExternalId) {
+		return service.refundPayment(orderExternalId);
+	}
+	
+	@PatchMapping("/api/user/order/payment/{transactionId}")
+	public ResponseEntity<?> refundPaymentByTransactionId(@PathVariable String transactionId) {
+		return service.refundPayment(transactionId);
 	}
 
 }

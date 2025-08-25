@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api.ecommerce.dto.request.QuantityDTO;
 import com.api.ecommerce.dto.response.CartItemResponseDTO;
 import com.api.ecommerce.service.CartItemService;
 
@@ -43,8 +44,8 @@ public class CartItemRestController {
 	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
 	})
 	@PatchMapping("/{cartItemExternalId}/add")
-	public ResponseEntity<?> addQuantityForCartItem(@PathVariable String cartItemExternalId, @RequestBody int quantity){
-		return service.addQuantityForCartItem(cartItemExternalId, quantity);
+	public ResponseEntity<?> addQuantityForCartItem(@PathVariable String cartItemExternalId, @RequestBody QuantityDTO quantityDto){
+		return service.addQuantityForCartItem(cartItemExternalId, quantityDto.getQuantity());
 	}
 	
 	@Operation(summary = "Remove quantity for a user's cart item", description = "API decreases the cart item quantity and returns the updated cart item")
@@ -53,8 +54,8 @@ public class CartItemRestController {
 	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
 	})
 	@PatchMapping("/{cartItemExternalId}/remove")
-	public ResponseEntity<?> removeQuantityForCartItem(@PathVariable String cartItemExternalId, @RequestBody int quantity){
-		return service.removeQuantityForCartItem(cartItemExternalId, quantity);
+	public ResponseEntity<?> removeQuantityForCartItem(@PathVariable String cartItemExternalId, @RequestBody QuantityDTO quantityDto){
+		return service.removeQuantityForCartItem(cartItemExternalId, quantityDto.getQuantity());
 	}
 	
 	@Operation(summary = "Delete cart item for the user", description = "API deletes the product from user's cart")

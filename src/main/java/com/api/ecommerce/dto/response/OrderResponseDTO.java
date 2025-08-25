@@ -1,19 +1,19 @@
 package com.api.ecommerce.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class OrderResponseDTO {
 	
 	private String orderExternalId;
-	private String personName;
-	private String address;
-	private String phoneNumber;
-	private String emailID;
+	private String status;
+	private AddressResponseDTO address;
+	private String customerName;
+	private String customerExternalId;
 	private int orderItemCount;
 	private List<OrderItemResponseDTO> orderItems;
-	private double totalCost;
-	private boolean isPaid;
+	private BigDecimal totalCost;
 	private PaymentResponseDTO payment;
 	private LocalDateTime orderDate;
 	
@@ -25,29 +25,11 @@ public class OrderResponseDTO {
 	public void setOrderExternalId(String orderExternalId) {
 		this.orderExternalId = orderExternalId;
 	}
-	public String getPersonName() {
-		return personName;
-	}
-	public void setPersonName(String personName) {
-		this.personName = personName;
-	}
-	public String getAddress() {
+	public AddressResponseDTO getAddress() {
 		return address;
 	}
-	public void setAddress(String address) {
+	public void setAddress(AddressResponseDTO address) {
 		this.address = address;
-	}
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-	public String getEmailID() {
-		return emailID;
-	}
-	public void setEmailID(String emailID) {
-		this.emailID = emailID;
 	}
 	public int getOrderItemCount() {
 		return orderItemCount;
@@ -61,17 +43,11 @@ public class OrderResponseDTO {
 	public void setOrderItems(List<OrderItemResponseDTO> orderItems) {
 		this.orderItems = orderItems;
 	}
-	public double getTotalCost() {
+	public BigDecimal getTotalCost() {
 		return totalCost;
 	}
-	public void setTotalCost(double totalCost) {
+	public void setTotalCost(BigDecimal totalCost) {
 		this.totalCost = totalCost;
-	}
-	public boolean isPaid() {
-		return isPaid;
-	}
-	public void setPaid(boolean isPaid) {
-		this.isPaid = isPaid;
 	}
 	public PaymentResponseDTO getPayment() {
 		return payment;
@@ -85,9 +61,29 @@ public class OrderResponseDTO {
 	public void setOrderDate(LocalDateTime orderDate) {
 		this.orderDate = orderDate;
 	}
-	
-	
 
-	
+	public String getStatus() {
+		return status;
+	}
 
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
+	public String getCustomerExternalId() {
+		return customerExternalId;
+	}
+
+	public void setCustomerExternalId(String customerExternalId) {
+		this.customerExternalId = customerExternalId;
+	}
+	
 }

@@ -1,13 +1,15 @@
 package com.api.ecommerce.dto.response;
 
+import java.math.BigDecimal;
+
 public class ProductResponseDTO {
 	
 	private String productExternalId;
 	private String productName;
 	private String description;
 	private int stock;
-	private double price;
-	private int totalRating;
+	private BigDecimal price;
+	private double totalRating;
 	private int discountPercentage;
 	
 	private int orderedCount;
@@ -39,16 +41,16 @@ public class ProductResponseDTO {
 	public void setStock(int stock) {
 		this.stock = stock;
 	}
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
-	public int getTotalRating() {
+	public double getTotalRating() {
 		return totalRating;
 	}
-	public void setTotalRating(int totalRating) {
+	public void setTotalRating(double totalRating) {
 		this.totalRating = totalRating;
 	}
 	public int getDiscountPercentage() {

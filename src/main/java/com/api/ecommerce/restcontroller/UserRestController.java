@@ -56,12 +56,24 @@ public class UserRestController {
 	
 	///
 	
+	@Operation(summary = "Retrieve User by EmailID & Password", description = "API returns the registered user by the External ID")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "User with given email id and password retrieved successfully!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
+	})
+	@PostMapping("/login")
+	public ResponseEntity<?> retrieveByEmailIDandPassword(@Valid @RequestBody UserRequestDTO user) {
+		return service.retrieveByEmailIDandPassword(user);
+	}
+	
+	///
+	
 	@Operation(summary = "Register a new user", description = "API registers the user and returns the same user")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "Users added successfully!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = UserResponseDTO.class))),
 	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
 	})
-	@PostMapping
+	@PostMapping("/signup")
 	public ResponseEntity<?> addUser(@Valid @RequestBody UserRequestDTO user) {
 		return service.addUser(user);
 	}

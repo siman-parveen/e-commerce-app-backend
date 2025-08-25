@@ -1,17 +1,14 @@
 package com.api.ecommerce.dto.request;
 
+import java.math.BigDecimal;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public class ProductRequestDTO {
-	
-	@NotBlank(message = "Product External ID is required")
-	@Schema(description = "Unique identifier for the product")
-	private String productExternalId;
 	
 	@Size(max = 100, message = "Product name must not exceed 100 characters")
 	@Schema(description = "Name of the product", nullable = true)
@@ -27,7 +24,7 @@ public class ProductRequestDTO {
 	
 	@Positive(message = "Price must be greater than 0")
 	@Schema(description = "Price of the product", nullable = true)
-	private Double price;
+	private BigDecimal price;
 	
 	@Min(value = 0, message = "Discount must be between 0 and 100")
 	@Max(value = 100, message = "Discount must be between 0 and 100")
@@ -35,14 +32,6 @@ public class ProductRequestDTO {
 	private Integer discountPercentage;
 	
 	public ProductRequestDTO() {}
-
-	public String getProductExternalId() {
-		return productExternalId;
-	}
-
-	public void setProductExternalId(String productExternalId) {
-		this.productExternalId = productExternalId;
-	}
 
 	public String getProductName() {
 		return productName;
@@ -68,11 +57,11 @@ public class ProductRequestDTO {
 		this.stock = stock;
 	}
 
-	public Double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(Double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,23 +20,33 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long entityId;
+	
+	@Column(nullable = false, unique = true)
 	private String externalId;
+	
+	@Column(nullable = false)
 	private String userName;
+	
+	@Column(nullable = false)
 	private String emailId;
+	
+	@Column(nullable = false)
 	private String password;
+	
+	@Column(nullable = false)
 	private String phoneNumber;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserAddress> address;
+	private List<UserAddress> address = new ArrayList<>();
 	
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-	private Cart cart;
+	private Cart cart = new Cart();
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Order> orders = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Rating> ratings = new ArrayList<>();
+	private List<Review> reviews = new ArrayList<>();
 	
 	public User() {}
 
@@ -111,12 +122,12 @@ public class User {
 		this.orders = orders;
 	}
 
-	public List<Rating> getRatings() {
-		return ratings;
+	public List<Review> getReviews() {
+		return reviews;
 	}
 
-	public void setRatings(List<Rating> ratings) {
-		this.ratings = ratings;
+	public void setReviews(List<Review> reviews) {
+		this.reviews = reviews;
 	}
 	
 }

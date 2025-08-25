@@ -8,10 +8,12 @@ import com.api.ecommerce.entity.User;
 
 public interface UserRepo extends JpaRepository<User, Long> {
 
-	public Optional<User> findByExternalId(String userExternalId);
-
 	public Optional<User> findByEmailId(String emailId);
 
 	public Optional<User> findByEmailIdOrPhoneNumber(String emailId, String phoneNumber);
+
+	public Optional<User> findByEmailIdAndPassword(String emailId, String phoneNumber);
+
+	public Optional<User> findByExternalId(String externalId);
 
 }
