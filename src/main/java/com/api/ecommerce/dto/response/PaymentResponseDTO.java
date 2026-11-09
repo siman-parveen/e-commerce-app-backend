@@ -1,6 +1,7 @@
 package com.api.ecommerce.dto.response;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class PaymentResponseDTO {
 	
@@ -9,6 +10,7 @@ public class PaymentResponseDTO {
 	private String paymentStatus;
 	private BigDecimal totalAmount;
 	private String orderExternalId;
+	private LocalDateTime transactionDate;
 	
 	public PaymentResponseDTO() {}
 	
@@ -41,6 +43,14 @@ public class PaymentResponseDTO {
 	}
 	public void setOrderExternalId(String orderExternalId) {
 		this.orderExternalId = orderExternalId;
+	}
+
+	public LocalDateTime getTransactionDate() {
+		return transactionDate;
+	}
+
+	public void setTransactionDate(LocalDateTime transactionDate) {
+		this.transactionDate = transactionDate;
 	}
 
 }

@@ -16,7 +16,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 
 @Entity(name = "orders")
 public class Order {
@@ -43,8 +42,11 @@ public class Order {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private OrderStatus orderStatus;
+	
+	@Column(nullable = false)
+	private String orderReceiverName;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "address_id", nullable = false)
 	private UserAddress deliveryAddress;
 
@@ -135,6 +137,14 @@ public class Order {
 
 	public void setOrderItems(List<OrderItem> orderItems) {
 		this.orderItems = orderItems;
+	}
+
+	public String getOrderReceiverName() {
+		return orderReceiverName;
+	}
+
+	public void setOrderReceiverName(String orderReceiverName) {
+		this.orderReceiverName = orderReceiverName;
 	}
 
 }

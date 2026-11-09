@@ -1,4 +1,4 @@
-package com.api.ecommerce.restcontroller;
+package com.api.ecommerce.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +14,6 @@ import com.api.ecommerce.dto.response.PaymentResponseDTO;
 import com.api.ecommerce.service.PaymentService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -29,44 +24,34 @@ public class PaymentRestController {
 	@Autowired
 	private PaymentService service;
 	
-	@Operation(summary = "Make Payment for a specific order", description = "API returns the payment made by the user to a specific order")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "Payment retrieved successfully for the order!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = PaymentResponseDTO.class))),
-	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
-	})
+	@Operation(summary = "Make a payment for an order", description = "Processes the supplied payment for the order identified by its external ID.")
 	@PostMapping("/api/user/order/{orderExternalId}/payment")
 	public ResponseEntity<?> makePaymentForOrder(@PathVariable String orderExternalId, @Valid @RequestBody PaymentRequestDTO payment) {
 		return service.makePaymentForOrder(orderExternalId, payment);
 	}
 	
-	@Operation(summary = "Retrieve Payment for a specific order", description = "API returns the payment made by the user to a specific order")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "Payment retrieved successfully for the order!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = PaymentResponseDTO.class))),
-	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
-	})
+	@Operation(summary = "Retrieve payment for an order", description = "Returns the payment record associated with the specified order.")
 	@GetMapping("/api/user/order/{orderExternalId}/payment")
 	public ResponseEntity<?> retrievePaymentForOrderForUser(@PathVariable String orderExternalId) {
 		return service.retrievePaymentForOrder(orderExternalId);
 	}
 	
-	@Operation(summary = "Retrieve All Payments", description = "API returns the all the payments that are made by the users")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "Payments retrieved successfully!!", content = @Content(mediaType = "/application/json", array = @ArraySchema(schema = @Schema(implementation = PaymentResponseDTO.class)))),
-	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
-	})
+	@Operation(summary = "Retrieve all payments", description = "Returns payment records for all orders.")
 	@GetMapping("/api/admin/payments")
 	public ResponseEntity<?> retrieveAllPayments() {
 		return service.retrieveAllPayments();
 	}
-	
+
+	@Operation(summary = "Refund Payment By Order Id", description = "API refunds the payment made to the order.")
 	@PatchMapping("/api/user/order/{orderExternalId}/refund/payment")
 	public ResponseEntity<?> refundPaymentByOrderExternalId(@PathVariable String orderExternalId) {
 		return service.refundPayment(orderExternalId);
 	}
-	
+
+	@Operation(summary = "Refund Payment By Transaction Id", description = "API refunds the payment transaction.")
 	@PatchMapping("/api/user/order/payment/{transactionId}")
 	public ResponseEntity<?> refundPaymentByTransactionId(@PathVariable String transactionId) {
-		return service.refundPayment(transactionId);
+		return service.refundPaymentByTransactionIdd(transactionId);
 	}
 
 }

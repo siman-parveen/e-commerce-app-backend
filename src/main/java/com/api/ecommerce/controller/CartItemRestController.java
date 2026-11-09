@@ -1,4 +1,4 @@
-package com.api.ecommerce.restcontroller;
+package com.api.ecommerce.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +14,6 @@ import com.api.ecommerce.dto.response.CartItemResponseDTO;
 import com.api.ecommerce.service.CartItemService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -39,30 +35,18 @@ public class CartItemRestController {
 //	}
 	
 	@Operation(summary = "Add quantity for a user's cart item", description = "API increases the cart item quantity and returns the updated cart item")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "Cart Item quantity increased", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = CartItemResponseDTO.class))),
-	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
-	})
 	@PatchMapping("/{cartItemExternalId}/add")
 	public ResponseEntity<?> addQuantityForCartItem(@PathVariable String cartItemExternalId, @RequestBody QuantityDTO quantityDto){
 		return service.addQuantityForCartItem(cartItemExternalId, quantityDto.getQuantity());
 	}
 	
 	@Operation(summary = "Remove quantity for a user's cart item", description = "API decreases the cart item quantity and returns the updated cart item")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "Cart Item quantity decreased!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = CartItemResponseDTO.class))),
-	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
-	})
 	@PatchMapping("/{cartItemExternalId}/remove")
 	public ResponseEntity<?> removeQuantityForCartItem(@PathVariable String cartItemExternalId, @RequestBody QuantityDTO quantityDto){
 		return service.removeQuantityForCartItem(cartItemExternalId, quantityDto.getQuantity());
 	}
 	
 	@Operation(summary = "Delete cart item for the user", description = "API deletes the product from user's cart")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "Cart Item removed successfully!!", content = @Content(mediaType = "/application/json")),
-	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
-	})
 	@DeleteMapping("/{cartItemExternalId}")
 	public ResponseEntity<?> removeCartItem(@PathVariable String cartItemExternalId){
 		return service.removeCartItem(cartItemExternalId);

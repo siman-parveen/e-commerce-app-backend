@@ -40,6 +40,10 @@ public class OrderRequestDTO {
     @Valid
     @Schema(description = "List of items in the order")
     private List<ProductQuantityRequestDTO> orderItems;
+    
+    @NotEmpty(message = "Order receiver name is required")
+    @Schema(description = "Name of the person to which the order is delivered")
+    private String orderReceiverName;
 
 	public OrderRequestDTO() {}
 
@@ -89,6 +93,14 @@ public class OrderRequestDTO {
 
 	public void setOrderItems(List<ProductQuantityRequestDTO> orderItems) {
 		this.orderItems = orderItems;
+	}
+
+	public String getOrderReceiverName() {
+		return orderReceiverName;
+	}
+
+	public void setOrderReceiverName(String orderReceiverName) {
+		this.orderReceiverName = orderReceiverName;
 	}
 
 }

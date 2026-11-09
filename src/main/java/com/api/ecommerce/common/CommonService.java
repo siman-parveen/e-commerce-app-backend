@@ -25,6 +25,7 @@ import com.api.ecommerce.dto.response.OrderResponseDTO;
 import com.api.ecommerce.dto.response.PaymentResponseDTO;
 import com.api.ecommerce.dto.response.ProductResponseDTO;
 import com.api.ecommerce.dto.response.ProductReviewResponseDTO;
+import com.api.ecommerce.dto.response.ProductUserBroughtResponseDTO;
 import com.api.ecommerce.dto.response.ReviewDTO;
 import com.api.ecommerce.dto.response.ReviewResponseDTO;
 import com.api.ecommerce.dto.response.UserResponseDTO;
@@ -72,43 +73,28 @@ public class CommonService {
 	
 	public Product findProductByExternalId(String productExternalId) {
 		Optional<Product> product = productRepo.findByExternalId(productExternalId);
-		if(product.isEmpty()) {
-			return null;
-		}
-		return product.get();		
-	}
+        return product.orElse(null);
+    }
 	
 	public User findUserByExternalId(String userExternalId) {
 		Optional<User> user = userRepo.findByExternalId(userExternalId);
-		if(user.isEmpty()) {
-			return null;
-		}
-		return user.get();
-	}
+        return user.orElse(null);
+    }
 	
 	public UserAddress findUserAddressByExternalId(String userAddressExternalId) {
 		Optional<UserAddress> address = addressRepo.findByExternalId(userAddressExternalId);
-		if(address.isEmpty()) {
-			return null;
-		}
-		return address.get();
-	}
+        return address.orElse(null);
+    }
 	
 	public Order findOrderByExternalId(String orderExternalId) {
 		Optional<Order> order = orderRepo.findByExternalId(orderExternalId);
-		if(order.isEmpty()) {
-			return null;
-		}
-		return order.get();
-	}
+        return order.orElse(null);
+    }
 	
 	public Payment findPaymentByOrderId(Long ordersId) {
 		Optional<Payment> payment = paymentRepo.findByOrder_EntityId(ordersId);
-		if(payment.isEmpty()) {
-			return null;
-		}
-		return payment.get();
-	}
+        return payment.orElse(null);
+    }
 
 	public Product convertProductRequestDTOToProduct(ProductRequestDTO productDto) {
 		Product product = new Product();
@@ -130,23 +116,25 @@ public class CommonService {
 		return user;
 	}
 	
-	public Order convertOrderRequestDtoToOrder(OrderRequestDTO orderRqst) {
+	public Order convertOrderRequestDtoToOrder(OrderRequestDTO orderRequest) {
 		Order order = new Order();
 		
-		User user = findUserByExternalId(orderRqst.getUserExternalId());
+		User user = findUserByExternalId(orderRequest.getUserExternalId());
 		order.setUser(user);
 
-		UserAddress deliveryAddress = findUserAddressByExternalId(orderRqst.getDeliveryAddressExternalId());
+		UserAddress deliveryAddress = findUserAddressByExternalId(orderRequest.getDeliveryAddressExternalId());
 		order.setDeliveryAddress(deliveryAddress);
 
 		order.setExternalId(generateExternalIdForEntities("ORD"));
 		order.setOrderDate(LocalDateTime.now());
-		order.setDeductions(orderRqst.getDeductions());
-		order.setPhoneNumber(orderRqst.getPhoneNumber());
-		order.setTotalAmount(orderRqst.getTotalAmount());
+		order.setDeductions(orderRequest.getDeductions());
+		order.setPhoneNumber(orderRequest.getPhoneNumber());
+		order.setTotalAmount(orderRequest.getTotalAmount());
 		order.setOrderStatus(OrderStatus.NEW);
 
-		order.setOrderItems(orderRqst.getOrderItems().stream().map(item -> convertProductQuantityRequestDtoToOrderItem(item, order)).toList());
+		order.setOrderItems(orderRequest.getOrderItems().stream().map(item -> convertProductQuantityRequestDtoToOrderItem(item, order)).toList());
+		
+		order.setOrderReceiverName(orderRequest.getOrderReceiverName());
 		
 		return order;
 	}
@@ -183,7 +171,7 @@ public class CommonService {
 	}
 	
 	public String generateExternalIdForEntities(String prefix) {
-		return prefix + UUID.randomUUID().toString().replace("-", "").substring(0, 20).toUpperCase();
+		return prefix.toLowerCase() + UUID.randomUUID().toString().replace("-", "").substring(0, 20).toUpperCase();
 	}
 
 	public UserResponseDTO convertUsersToUserResponseDTO(User user) {
@@ -193,7 +181,7 @@ public class CommonService {
 		dto.setEmailId(user.getEmailId());
 		dto.setPhoneNumber(user.getPhoneNumber());
 		
-		List<AddressResponseDTO> addresses = user.getAddress().stream().map(address -> convertAddressToAddressResponseDTO(address)).toList();
+		List<AddressResponseDTO> addresses = user.getAddress().stream().map(this::convertAddressToAddressResponseDTO).toList();
 		
 		dto.setAddress(addresses);
 		
@@ -230,12 +218,23 @@ public class CommonService {
 		
 		dto.setOrderItemCount(order.getOrderItems().size());
 		
-		List<OrderItemResponseDTO> orderItems = order.getOrderItems().stream().map(item -> convertOrderItemToOrderItemResponseDTO(item)).toList();
+		List<OrderItemResponseDTO> orderItems = order.getOrderItems().stream().map(this::convertOrderItemToOrderItemResponseDTO).toList();
 		dto.setOrderItems(orderItems);
 		
+		BigDecimal cost = orderItems.stream()
+				.map(item -> BigDecimal.valueOf(item.getQuantity())
+						.multiply(item.getProductPrice()))
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		dto.setTotalCost(cost);
+
 		dto.setStatus(order.getOrderStatus().name());
 		
-		dto.setPayment(convertPaymentToPaymentResponseDTO(findPaymentByOrderId(order.getEntityId())));
+		Payment payment = findPaymentByOrderId(order.getEntityId());
+		
+		if(payment != null) {
+			dto.setPayment(convertPaymentToPaymentResponseDTO(payment));
+		}
 		
 		return dto;
 	}
@@ -270,6 +269,7 @@ public class CommonService {
 		dto.setPaymentStatus(payment.getPaymentStatus().name());
 		dto.setTotalAmount(payment.getOrder().getTotalAmount());
 		dto.setTransactionId(payment.getTransactionId());
+		dto.setTransactionDate(payment.getPaymentDate());
 		return dto;
 	}
 	
@@ -278,7 +278,7 @@ public class CommonService {
 		dto.setCartExternalId(cart.getExternalId());
 		dto.setCartItemCount(cart.getCartItem().size());
 		
-		List<CartItemResponseDTO> cartItems = cart.getCartItem().stream().map(item -> convertCartItemToCartItemResponseDTO(item)).toList();
+		List<CartItemResponseDTO> cartItems = cart.getCartItem().stream().map(this::convertCartItemToCartItemResponseDTO).toList();
 		
 		dto.setCartItemResponseDto(cartItems);
 		
@@ -336,9 +336,9 @@ public class CommonService {
 		if(reviews == null || reviews.isEmpty()) {
 			return 0;
 		}
-		return (reviews.stream()
-					.mapToInt(Review::getRating)
-					.sum())/reviews.size();
+		return (double) (reviews.stream()
+                .mapToInt(Review::getRating)
+                .sum()) /reviews.size();
 	}
 
 	public UserAddress convertAddressRequestDtoToAddress(AddressRequestDTO addressDto) {
@@ -356,6 +356,7 @@ public class CommonService {
 
 	public ReviewResponseDTO convertReviewToReviewResponseDTO(Review review) {
 		ReviewResponseDTO dto = new ReviewResponseDTO();
+		dto.setReviewExternalId(review.getExternalId());
 		dto.setComment(review.getComment());
 		dto.setCustomerName(review.getUser().getUserName());
 		dto.setProductName(review.getProduct().getProductName());
@@ -388,7 +389,7 @@ public class CommonService {
 		ProductReviewResponseDTO dto = new ProductReviewResponseDTO();
 		dto.setProductExternalId(product.getExternalId());
 		dto.setProductName(product.getProductName());
-		dto.setReviews(productReviews.stream().map(review -> convertReviewToReviewDTO(review)).toList());
+		dto.setReviews(productReviews.stream().map(this::convertReviewToReviewDTO).toList());
 		return dto;
 	}
 
@@ -404,6 +405,32 @@ public class CommonService {
 
 	public void updatePaymentStatus(Payment payment, PaymentStatus status) {
 		payment.setPaymentStatus(status);
+	}
+
+	public ProductUserBroughtResponseDTO createProductUserBroughtResponseDTO(Review review, User user, OrderItem orderItem) {
+		ProductUserBroughtResponseDTO dto = new ProductUserBroughtResponseDTO();
+		
+		Product product = orderItem.getProduct();
+		
+		dto.setProductExternalId(product.getExternalId());
+		dto.setProductName(product.getProductName());
+		
+		if(review != null) {
+			dto.setRatingExternalId(review.getExternalId());
+			dto.setRating(review.getRating());
+			dto.setComment(review.getComment());
+			dto.setReviewedAt(review.getReviewedAt());
+		}
+		
+		dto.setOrderExternalId(orderItem.getOrder().getExternalId());
+		dto.setOrderStatus(orderItem.getOrder().getOrderStatus().name());
+		dto.setPrice(orderItem.getTotalPrice());
+		dto.setQuantity(orderItem.getQuantity());
+		
+		dto.setProductDeliveryDate(orderItem.getDeliveryDate());
+		dto.setUserName(user.getUserName());
+		
+		return dto;
 	}
 	
 }
