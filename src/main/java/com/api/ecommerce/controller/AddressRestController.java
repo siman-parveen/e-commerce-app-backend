@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.api.ecommerce.dto.request.AddressRequestDTO;
-import com.api.ecommerce.dto.response.AddressResponseDTO;
 import com.api.ecommerce.service.AddressService;
 
 import io.swagger.v3.oas.annotations.Operation;

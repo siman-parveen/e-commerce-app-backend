@@ -18,6 +18,7 @@ import com.api.ecommerce.entity.User;
 import com.api.ecommerce.repo.ReviewRepo;
 import com.api.ecommerce.response.Response;
 import com.api.ecommerce.service.ReviewService;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
@@ -33,7 +34,7 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		List<Review> reviews = repo.findAll();
 		
-		if(reviews == null || reviews.isEmpty()) {
+		if(CollectionUtils.isEmpty(reviews)) {
 			response.setSuccess(false);
 			response.setMessage("No Reviews Added!!");
 			return ResponseEntity.ok().body(response);
@@ -41,7 +42,7 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		response.setSuccess(true);
 		response.setMessage("Reviews Retrieved Successfully!!");
-		response.setData(reviews.stream().map(review -> service.convertReviewToReviewResponseDTO(review)).toList());
+		response.setResponseData(reviews.stream().map(review -> service.convertReviewToReviewResponseDTO(review)).toList());
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -67,7 +68,7 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		response.setSuccess(true);
 		response.setMessage("Reviews Retrieved Successfully Given By User!!");
-		response.setData(reviews.stream().map(review -> service.convertReviewToReviewResponseDTO(review)).toList());
+		response.setResponseData(reviews.stream().map(review -> service.convertReviewToReviewResponseDTO(review)).toList());
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -93,7 +94,7 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		response.setSuccess(true);
 		response.setMessage("Reviews Retrieved Successfully Given To Product!!");
-		response.setData(service.convertReviewToProductReviewResponseDTO(productReviews, product));
+		response.setResponseData(service.convertReviewToProductReviewResponseDTO(productReviews, product));
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -107,7 +108,7 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		response.setSuccess(true);
 		response.setMessage("Reviews Added Successfully!!");
-		response.setData(service.convertReviewToReviewResponseDTO(review));
+		response.setResponseData(service.convertReviewToReviewResponseDTO(review));
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -137,7 +138,7 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		response.setSuccess(true);
 		response.setMessage("Reviews Added Successfully!!");
-		response.setData(service.convertReviewToReviewResponseDTO(review));
+		response.setResponseData(service.convertReviewToReviewResponseDTO(review));
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -175,7 +176,7 @@ public class ReviewServiceImpl implements ReviewService {
 		
 		response.setSuccess(true);
 		response.setMessage("Review retrieved Successfully!!");
-		response.setData(service.convertReviewToReviewResponseDTO(review.get()));
+		response.setResponseData(service.convertReviewToReviewResponseDTO(review.get()));
 		return ResponseEntity.ok().body(response);
 	}
 

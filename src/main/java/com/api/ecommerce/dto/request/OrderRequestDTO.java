@@ -11,7 +11,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Data;
 
+@Data
 public class OrderRequestDTO {
 
     @NotNull(message = "Total amount is required")
@@ -44,63 +46,4 @@ public class OrderRequestDTO {
     @NotEmpty(message = "Order receiver name is required")
     @Schema(description = "Name of the person to which the order is delivered")
     private String orderReceiverName;
-
-	public OrderRequestDTO() {}
-
-	public BigDecimal getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(BigDecimal totalAmount) {
-		this.totalAmount = totalAmount;
-	}
-
-	public BigDecimal getDeductions() {
-		return deductions;
-	}
-
-	public void setDeductions(BigDecimal deductions) {
-		this.deductions = deductions;
-	}
-
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-
-	public String getDeliveryAddressExternalId() {
-		return deliveryAddressExternalId;
-	}
-
-	public void setDeliveryAddressExternalId(String deliveryAddressExternalId) {
-		this.deliveryAddressExternalId = deliveryAddressExternalId;
-	}
-
-	public String getUserExternalId() {
-		return userExternalId;
-	}
-
-	public void setUserExternalId(String userExternalId) {
-		this.userExternalId = userExternalId;
-	}
-
-	public List<ProductQuantityRequestDTO> getOrderItems() {
-		return orderItems;
-	}
-
-	public void setOrderItems(List<ProductQuantityRequestDTO> orderItems) {
-		this.orderItems = orderItems;
-	}
-
-	public String getOrderReceiverName() {
-		return orderReceiverName;
-	}
-
-	public void setOrderReceiverName(String orderReceiverName) {
-		this.orderReceiverName = orderReceiverName;
-	}
-
 }

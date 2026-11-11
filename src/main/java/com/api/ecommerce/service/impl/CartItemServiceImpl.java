@@ -31,7 +31,7 @@ public class CartItemServiceImpl implements CartItemService {
 		
 		response.setSuccess(true);
 		response.setMessage("Cart item retrieved successfully!!");
-		response.setData(cartItem);
+		response.setResponseData(cartItem);
 			
 		return ResponseEntity.ok().body(response);	
 	}
@@ -59,7 +59,7 @@ public class CartItemServiceImpl implements CartItemService {
 		
 		response.setSuccess(true);
 		response.setMessage("Cart item quantity increased successfully!!");
-		response.setData(cartItem);
+		response.setResponseData(cartItem);
 			
 		return ResponseEntity.ok().body(response);	
 	}
@@ -96,7 +96,7 @@ public class CartItemServiceImpl implements CartItemService {
 		
 		response.setSuccess(true);
 		response.setMessage("Cart item quantity removed successfully!!");
-		response.setData(cartItem);
+		response.setResponseData(cartItem);
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -122,11 +122,6 @@ public class CartItemServiceImpl implements CartItemService {
 	
 	private CartItem findCartItemByExternalId(String cartItemExternalId){
 		Optional<CartItem> cartItem = itemRepo.findByExternalId(cartItemExternalId);
-		
-		if(cartItem.isEmpty()) {
-			return null;
-		}
-		
-		return cartItem.get();
-	}
+        return cartItem.orElse(null);
+    }
 }

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.api.ecommerce.entity.Order;
 import com.api.ecommerce.entity.OrderItem;
 
-
 @Repository
 public interface OrderItemRepo extends JpaRepository<OrderItem, Long>{
 

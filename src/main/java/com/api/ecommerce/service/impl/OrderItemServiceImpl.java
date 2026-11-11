@@ -44,7 +44,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDER_ITEM_RETRIEVED_SUCCESSFULLY);
-		response.setData(orderItem.get());
+		response.setResponseData(orderItem.get());
 		
 		return ResponseEntity.ok().body(response);
 	}

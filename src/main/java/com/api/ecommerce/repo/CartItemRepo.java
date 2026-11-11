@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.api.ecommerce.entity.CartItem;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface CartItemRepo extends JpaRepository<CartItem, Long> {
 
 	public Optional<CartItem> findByExternalId(String cartItemExternalId);

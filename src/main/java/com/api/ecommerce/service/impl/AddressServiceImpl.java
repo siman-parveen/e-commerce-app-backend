@@ -27,7 +27,7 @@ public class AddressServiceImpl implements AddressService  {
 
 	public ResponseEntity<?> addUserAddress(AddressRequestDTO addressDto) {
 		
-		Response<AddressResponseDTO> response = new Response<AddressResponseDTO>();
+		Response<AddressResponseDTO> response = new Response<>();
 		
 		UserAddress address = service.convertAddressRequestDtoToAddress(addressDto);
 		
@@ -35,14 +35,14 @@ public class AddressServiceImpl implements AddressService  {
 		
 		response.setSuccess(true);
 		response.setMessage("Address added successfully!!");
-		response.setData(service.convertAddressToAddressResponseDTO(address));
+		response.setResponseData(service.convertAddressToAddressResponseDTO(address));
 		
 		return ResponseEntity.ok().body(response);
 	}
 
 	public ResponseEntity<?> updateUserAddress(String addressExternalId, AddressRequestDTO addressDto) {
 		
-		Response<AddressResponseDTO> response = new Response<AddressResponseDTO>();
+		Response<AddressResponseDTO> response = new Response<>();
 		
 		Optional<UserAddress> address =  repo.findByExternalId(addressExternalId);
 		
@@ -70,8 +70,8 @@ public class AddressServiceImpl implements AddressService  {
 			userAddress.setCountry(addressDto.getCountry());
 		}
 		
-		if(service.isUpdated(userAddress.getPincode(), addressDto.getPincode())) {
-			userAddress.setPincode(addressDto.getPincode());
+		if(service.isUpdated(userAddress.getPinCode(), addressDto.getPinCode())) {
+			userAddress.setPinCode(addressDto.getPinCode());
 		}
 		
 		if(service.isUpdated(userAddress.getState(), addressDto.getState())) {
@@ -82,7 +82,7 @@ public class AddressServiceImpl implements AddressService  {
 		
 		response.setSuccess(true);
 		response.setMessage("Address updated successfully!!");
-		response.setData(service.convertAddressToAddressResponseDTO(address.get()));
+		response.setResponseData(service.convertAddressToAddressResponseDTO(address.get()));
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -126,7 +126,7 @@ public class AddressServiceImpl implements AddressService  {
 		
 		response.setSuccess(true);
 		response.setMessage("User Addresses retrieved successfully!!");
-		response.setData(addresses.stream().map(address -> service.convertAddressToAddressResponseDTO(address)).toList());
+		response.setResponseData(addresses.stream().map(address -> service.convertAddressToAddressResponseDTO(address)).toList());
 		
 		return ResponseEntity.ok().body(response);
 	}

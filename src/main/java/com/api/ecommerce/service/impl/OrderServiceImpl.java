@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDERS_RETRIEVED_SUCCESS_FOR_USER);
-		response.setData(ordersDto);
+		response.setResponseData(ordersDto);
 			
 		return ResponseEntity.ok().body(response);	
 	}
@@ -70,21 +70,21 @@ public class OrderServiceImpl implements OrderService {
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDER_RETRIEVED_SUCCESS_FOR_USER);
-		response.setData(commonService.convertOrderToOrderResponseDto(order));
+		response.setResponseData(commonService.convertOrderToOrderResponseDto(order));
 		
 		return ResponseEntity.ok().body(response);
 	}
 
-	public ResponseEntity<?> createOrderForUser(String userExternalId, @Valid OrderRequestDTO orderRqst) {
+	public ResponseEntity<?> createOrderForUser(String userExternalId, @Valid OrderRequestDTO orderRequest) {
 		Response<OrderResponseDTO> response = new Response<>();
 		
-		Order order = commonService.convertOrderRequestDtoToOrder(orderRqst);
+		Order order = commonService.convertOrderRequestDtoToOrder(orderRequest);
 		
 		orderRepo.save(order);
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDER_CREATED_SUCCESS_FOR_USER);
-		response.setData(commonService.convertOrderToOrderResponseDto(order));
+		response.setResponseData(commonService.convertOrderToOrderResponseDto(order));
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -126,7 +126,7 @@ public class OrderServiceImpl implements OrderService {
 				
 		response.setSuccess(true);
 		response.setMessage("Orders retrieved successfully");
-		response.setData(ordersDto);
+		response.setResponseData(ordersDto);
 			
 		return ResponseEntity.ok().body(response);	
 	}

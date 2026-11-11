@@ -201,7 +201,7 @@ public class CommonService {
 		dto.setAddressName(address.getAddressName());
 		dto.setCity(address.getCity());
 		dto.setCountry(address.getCountry());
-		dto.setPincode(address.getPincode());
+		dto.setPinCode(address.getPinCode());
 		dto.setState(address.getState());
 		return dto;
 	}
@@ -348,7 +348,7 @@ public class CommonService {
 		address.setAddressName(addressDto.getAddressName());
 		address.setCity(addressDto.getCity());
 		address.setCountry(addressDto.getCountry());
-		address.setPincode(addressDto.getPincode());
+		address.setPinCode(addressDto.getPinCode());
 		address.setState(addressDto.getState());
 		address.setUser(findUserByExternalId(addressDto.getUserExternalId()));
 		return address;

@@ -34,7 +34,7 @@ public class UserRestController {
 	}
 	
 	@Operation(summary = "Retrieve User by ID", description = "API returns the registered user by the External ID")
-	@GetMapping("/admin/user/{userExternalId}")
+	@GetMapping("/user/{userExternalId}")
 	public ResponseEntity<?> retrieveUserById(@PathVariable String userExternalId) {
 		return service.retrieveUserById(userExternalId);
 	}

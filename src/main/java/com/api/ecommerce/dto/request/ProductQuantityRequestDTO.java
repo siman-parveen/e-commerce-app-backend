@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
+@Data
 public class ProductQuantityRequestDTO {
 	
 	@NotBlank(message = "Product external ID is required")
@@ -16,22 +18,4 @@ public class ProductQuantityRequestDTO {
     @Schema(description = "Quantity of the product ordered")
     private Integer quantity;
 
-	public ProductQuantityRequestDTO() {}
-
-	public String getProductExternalId() {
-		return productExternalId;
-	}
-
-	public void setProductExternalId(String productExternalId) {
-		this.productExternalId = productExternalId;
-	}
-
-	public Integer getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
-	}
-	
 }

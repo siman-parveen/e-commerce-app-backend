@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.api.ecommerce.dto.request.QuantityDTO;
-import com.api.ecommerce.dto.response.CartItemResponseDTO;
 import com.api.ecommerce.service.CartItemService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,16 +22,6 @@ public class CartItemRestController {
 	
 	@Autowired
 	private CartItemService service;
-	
-//	@Operation(summary = "Retrieve a cart item by its External ID", description = "API returns the cart Item by the External ID")
-//	@ApiResponses({
-//		@ApiResponse(responseCode = "200", description = "Cart Item retrieved successfully!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = CartItemResponseDTO.class))),
-//	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
-//	})
-//	@GetMapping("/{cartItemExternalId}")
-//	public ResponseEntity<?> retrieveCartItems(@PathVariable String cartItemExternalId){
-//		return service.retrieveCartItems(cartItemExternalId);
-//	}
 	
 	@Operation(summary = "Add quantity for a user's cart item", description = "API increases the cart item quantity and returns the updated cart item")
 	@PatchMapping("/{cartItemExternalId}/add")

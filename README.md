@@ -279,7 +279,7 @@ START, PENDING, SUCCESS, FAILED, REFUNDED
   "addressLine": "221B Baker Street",
   "city": "London",
   "state": "London",
-  "pincode": "123456",
+  "pinCode": "123456",
   "country": "United Kingdom",
   "userExternalId": "user-external-id"
 }

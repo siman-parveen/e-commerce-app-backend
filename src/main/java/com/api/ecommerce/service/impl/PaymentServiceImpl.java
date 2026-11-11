@@ -39,7 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
 		if(paymentForTransactionId.isPresent()) {
 			response.setSuccess(true);
 			response.setMessage("Payment for Transaction ID already exists");
-			response.setData(commonService.convertPaymentToPaymentResponseDTO(paymentForTransactionId.get()));
+			response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(paymentForTransactionId.get()));
 			return ResponseEntity.ok().body(response);
 		}
 		Payment payment = commonService.makePaymentForOrder(orderExternalId, paymentDTO);
@@ -66,7 +66,7 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.PAYMENT_CREATED_SUCCESSFULLY);
-		response.setData(dto);
+		response.setResponseData(dto);
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -83,14 +83,14 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 		
 		List<PaymentResponseDTO> paymentList = new ArrayList<>();
-		
-		payments.forEach(payment -> {
-			paymentList.add(commonService.convertPaymentToPaymentResponseDTO(payment));
-		});
-		
-		response.setSuccess(true);
+
+        for (Payment payment : payments) {
+            paymentList.add(commonService.convertPaymentToPaymentResponseDTO(payment));
+        }
+
+        response.setSuccess(true);
 		response.setMessage("Payments retrieved successfully!!");
-		response.setData(paymentList);
+		response.setResponseData(paymentList);
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -102,7 +102,7 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		if(order == null) {
 			response.setSuccess(false);
-			response.setMessage("No order found with given usser id!!");
+			response.setMessage("No order found with given user id!!");
 			return ResponseEntity.ok().body(response);
 		}
 		
@@ -116,7 +116,7 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		response.setSuccess(true);
 		response.setMessage("Payment retrieved successfully");
-		response.setData(commonService.convertPaymentToPaymentResponseDTO(payment.get()));
+		response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(payment.get()));
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -152,7 +152,7 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		response.setSuccess(true);
 		response.setMessage("Order Payment refunded successfully");
-		response.setData(commonService.convertPaymentToPaymentResponseDTO(payment));
+		response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(payment));
 		
 		return ResponseEntity.ok().body(response);
 	}
@@ -188,7 +188,7 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		response.setSuccess(true);
 		response.setMessage("Transaction refunded.");
-		response.setData(commonService.convertPaymentToPaymentResponseDTO(payment));
+		response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(payment));
 		
 		return ResponseEntity.ok().body(response);
 	}

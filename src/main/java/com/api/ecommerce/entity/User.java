@@ -1,8 +1,13 @@
 package com.api.ecommerce.entity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,9 +17,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
 @Table(name = "users")
+@Data
 public class User {
 	
 	@Id
@@ -31,6 +38,7 @@ public class User {
 	private String emailId;
 	
 	@Column(nullable = false)
+	@JsonSerialize(using = PasswordMaskSerializer.class)
 	private String password;
 	
 	@Column(nullable = false)
@@ -41,93 +49,25 @@ public class User {
 	
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	private Cart cart = new Cart();
+
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+	private Wallet wallet = new Wallet();
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Order> orders = new ArrayList<>();
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Review> reviews = new ArrayList<>();
-	
-	public User() {}
 
-	public Long getEntityId() {
-		return entityId;
+	static class PasswordMaskSerializer extends JsonSerializer<String> {
+		@Override
+		public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) {
+			try {
+				gen.writeString("******");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getEmailId() {
-		return emailId;
-	}
-
-	public void setEmailId(String emailId) {
-		this.emailId = emailId;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-
-	public List<UserAddress> getAddress() {
-		return address;
-	}
-
-	public void setAddress(List<UserAddress> address) {
-		this.address = address;
-	}
-
-	public Cart getCart() {
-		return cart;
-	}
-
-	public void setCart(Cart cart) {
-		this.cart = cart;
-	}
-
-	public List<Order> getOrders() {
-		return orders;
-	}
-
-	public void setOrders(List<Order> orders) {
-		this.orders = orders;
-	}
-
-	public List<Review> getReviews() {
-		return reviews;
-	}
-
-	public void setReviews(List<Review> reviews) {
-		this.reviews = reviews;
-	}
-	
 }

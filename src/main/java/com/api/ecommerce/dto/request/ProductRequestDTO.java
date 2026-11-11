@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
+@Data
 public class ProductRequestDTO {
 	
 	@Size(max = 100, message = "Product name must not exceed 100 characters")
@@ -30,47 +32,5 @@ public class ProductRequestDTO {
 	@Max(value = 100, message = "Discount must be between 0 and 100")
 	@Schema(description = "Optional discount percentage (0-100)", nullable = true)
 	private Integer discountPercentage;
-	
-	public ProductRequestDTO() {}
 
-	public String getProductName() {
-		return productName;
-	}
-
-	public void setProductName(String productName) {
-		this.productName = productName;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Integer getStock() {
-		return stock;
-	}
-
-	public void setStock(Integer stock) {
-		this.stock = stock;
-	}
-
-	public BigDecimal getPrice() {
-		return price;
-	}
-
-	public void setPrice(BigDecimal price) {
-		this.price = price;
-	}
-
-	public Integer getDiscountPercentage() {
-		return discountPercentage;
-	}
-
-	public void setDiscountPercentage(Integer discountPercentage) {
-		this.discountPercentage = discountPercentage;
-	}
-	
 }
