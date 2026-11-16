@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonService;
@@ -25,7 +24,7 @@ public class AddressServiceImpl implements AddressService  {
 	@Autowired
 	private CommonService service;
 
-	public ResponseEntity<?> addUserAddress(AddressRequestDTO addressDto) {
+	public Response<?> addUserAddress(AddressRequestDTO addressDto) {
 		
 		Response<AddressResponseDTO> response = new Response<>();
 		
@@ -37,10 +36,10 @@ public class AddressServiceImpl implements AddressService  {
 		response.setMessage("Address added successfully!!");
 		response.setResponseData(service.convertAddressToAddressResponseDTO(address));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> updateUserAddress(String addressExternalId, AddressRequestDTO addressDto) {
+	public Response<?> updateUserAddress(String addressExternalId, AddressRequestDTO addressDto) {
 		
 		Response<AddressResponseDTO> response = new Response<>();
 		
@@ -49,7 +48,7 @@ public class AddressServiceImpl implements AddressService  {
 		if(address.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("No Addresses Found with given id!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 
 		UserAddress userAddress = address.get();
@@ -84,10 +83,10 @@ public class AddressServiceImpl implements AddressService  {
 		response.setMessage("Address updated successfully!!");
 		response.setResponseData(service.convertAddressToAddressResponseDTO(address.get()));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> deleteUserAddress(String addressExternalId) {
+	public Response<?> deleteUserAddress(String addressExternalId) {
 		Response<?> response = new Response<>();
 
 		Optional<UserAddress> address = repo.findByExternalId(addressExternalId);
@@ -95,17 +94,17 @@ public class AddressServiceImpl implements AddressService  {
 		if(address.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("No Addresses Found with given id!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		repo.deleteById(address.get().getEntityID());
 		response.setMessage("Address Deleted Successfully!!");
 		response.setSuccess(true);
 			
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveAddressForUser(String userExternalId) {
+	public Response<?> retrieveAddressForUser(String userExternalId) {
 		Response<List<AddressResponseDTO>> response = new Response<>();
 		
 		User user = service.findUserByExternalId(userExternalId);
@@ -113,7 +112,7 @@ public class AddressServiceImpl implements AddressService  {
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage("User not found!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		List<UserAddress> addresses = user.getAddress();
@@ -121,14 +120,14 @@ public class AddressServiceImpl implements AddressService  {
 		if(addresses == null || addresses.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("No Addresses Found For User!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		response.setSuccess(true);
 		response.setMessage("User Addresses retrieved successfully!!");
 		response.setResponseData(addresses.stream().map(address -> service.convertAddressToAddressResponseDTO(address)).toList());
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
 }

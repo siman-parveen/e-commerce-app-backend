@@ -1,17 +1,18 @@
 package com.api.ecommerce.service;
 
-import org.springframework.http.ResponseEntity;
+import com.api.ecommerce.dto.response.OrderResponseDTO;
+import com.api.ecommerce.response.Response;
 
 import com.api.ecommerce.dto.request.OrderRequestDTO;
 import jakarta.validation.Valid;
 
 public interface OrderService {
 	
-	public ResponseEntity<?> retrieveOrdersForUser(String userExternalId);
-	public ResponseEntity<?> retrieveOrder(String orderExternalId);
-	public ResponseEntity<?> createOrderForUser(String userExternalId, @Valid OrderRequestDTO orderRqst);
-	public ResponseEntity<?> cancelOrder(String orderExternalId);
-	public ResponseEntity<?> retrieveAllOrders();
-	public ResponseEntity<?> updateOrderStatus(String orderExternalId, String status);
+	public Response<?> retrieveOrdersForUser(String userExternalId);
+	public Response<?> retrieveOrder(String orderExternalId);
+	public Response<?> createOrderForUser(@Valid OrderRequestDTO orderRqst);
+	public Response<OrderResponseDTO> cancelOrder(String orderExternalId);
+	public Response<?> retrieveAllOrders();
+	public Response<?> updateOrderStatus(String orderExternalId, String status);
 
 }

@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import com.api.ecommerce.entity.Wallet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
@@ -32,7 +31,7 @@ public class UserServiceImpl implements UserService {
 		this.repo = repo;
 	}
 
-	public ResponseEntity<?> retrieveAllUsers(){
+	public Response<?> retrieveAllUsers(){
 		Response<List<UserResponseDTO>> response = new Response<>();
 
 		List<User> users = repo.findAll();
@@ -40,7 +39,7 @@ public class UserServiceImpl implements UserService {
 		if(CollectionUtils.isEmpty(users)) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_USERS_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		List<UserResponseDTO> dtoList = users.stream().map(user -> commonService.convertUsersToUserResponseDTO(user)).toList();
@@ -48,10 +47,10 @@ public class UserServiceImpl implements UserService {
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.RETRIEVE_ALL_USERS_SUCCESS);
 		response.setResponseData(dtoList);
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveUserById(String userExternalId) {
+	public Response<?> retrieveUserById(String userExternalId) {
 		Response<UserResponseDTO> response = new Response<>();
 		
 		User user = commonService.findUserByExternalId(userExternalId);
@@ -59,7 +58,7 @@ public class UserServiceImpl implements UserService {
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_USER_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		UserResponseDTO dto = commonService.convertUsersToUserResponseDTO(user);
@@ -68,17 +67,17 @@ public class UserServiceImpl implements UserService {
 		response.setMessage(CommonConstant.RETRIEVE_USER_SUCCESS);
 		response.setResponseData(dto);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> addUser(UserRequestDTO userDto) {
+	public Response<?> addUser(UserRequestDTO userDto) {
 		
 		Response<UserResponseDTO> response = new Response<>();
 
 		if(repo.findByEmailIdOrPhoneNumber(userDto.getEmailId(), userDto.getPhoneNumber()).isPresent()) {
 			response.setSuccess(false);
 			response.setMessage("Email ID/Phone Number Already registered");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		User user = commonService.convertUserRequestDTOToUser(userDto);
@@ -103,10 +102,10 @@ public class UserServiceImpl implements UserService {
 		response.setMessage(CommonConstant.USER_ADDED_SUCCESS);
 		response.setResponseData(dto);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> updateUserInfo(String userExternalId, UserRequestDTO userDto) {
+	public Response<?> updateUserInfo(String userExternalId, UserRequestDTO userDto) {
 		
 		Response<UserResponseDTO> response = new Response<>();
 			
@@ -115,7 +114,7 @@ public class UserServiceImpl implements UserService {
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_USER_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		if(userDto.getUserName() != null && commonService.isUpdated(user.getUserName(), userDto.getUserName())) {
@@ -123,10 +122,22 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		if(userDto.getEmailId() != null && commonService.isUpdated(user.getEmailId(), userDto.getEmailId())) {
+			Optional<User> existingUserWithEmail = repo.findByEmailId(userDto.getEmailId());
+			if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getEntityId().equals(user.getEntityId())) {
+				response.setSuccess(false);
+				response.setMessage("Email ID already registered by another user");
+				return response;
+			}
 			user.setEmailId(userDto.getEmailId());
 		}
 		
 		if(userDto.getPhoneNumber() != null && commonService.isUpdated(user.getPhoneNumber(), userDto.getPhoneNumber())) {
+			Optional<User> existingUserWithPhone = repo.findByPhoneNumber(userDto.getPhoneNumber());
+			if (existingUserWithPhone.isPresent() && !existingUserWithPhone.get().getEntityId().equals(user.getEntityId())) {
+				response.setSuccess(false);
+				response.setMessage("Phone Number already registered by another user");
+				return response;
+			}
 			user.setPhoneNumber(userDto.getPhoneNumber());
 		}
 		
@@ -138,10 +149,10 @@ public class UserServiceImpl implements UserService {
 		response.setSuccess(true);
 		response.setResponseData(dto);
 			
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> removeUser(String userExternalId) {
+	public Response<?> removeUser(String userExternalId) {
 		
 		Response<?> response = new Response<>();
 
@@ -150,25 +161,25 @@ public class UserServiceImpl implements UserService {
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_USER_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		repo.deleteById(user.getEntityId());
 		response.setMessage(CommonConstant.USER_DELETE_SUCCESS);
 		response.setSuccess(true);
 			
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveByEmailAndPassword(UserRequestDTO userDto) {
+	public Response<?> retrieveByEmailAndPassword(UserRequestDTO userDto) {
 		Response<UserResponseDTO> response = new Response<>();
 
-		Optional<User> user = repo.findByEmailIdAndPassword(userDto.getEmailId(), userDto.getPassword());
+		Optional<User> user = repo.findByEmailId(userDto.getEmailId());
 		
-		if(user.isEmpty()) {
+		if(user.isEmpty() || !commonService.passwordMatches(userDto.getPassword(), user.get().getPassword())) {
 			response.setSuccess(false);
 			response.setMessage("Email ID/ Password is incorrect");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		UserResponseDTO dto = commonService.convertUsersToUserResponseDTO(user.get());
@@ -177,7 +188,7 @@ public class UserServiceImpl implements UserService {
 		response.setMessage(CommonConstant.RETRIEVE_USER_SUCCESS);
 		response.setResponseData(dto);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
 	

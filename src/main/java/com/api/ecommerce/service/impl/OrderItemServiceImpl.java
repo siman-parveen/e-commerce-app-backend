@@ -1,9 +1,11 @@
 package com.api.ecommerce.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import com.api.ecommerce.dto.response.OrderItemResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
@@ -23,30 +25,35 @@ public class OrderItemServiceImpl implements OrderItemService {
 	@Autowired
 	private CommonService commonService;
 
-	public ResponseEntity<?> retrieveOrderItemForOrder(String orderExternalId) {
-		Response<OrderItem> response = new Response<>();
+	public Response<?> retrieveOrderItemForOrder(String orderExternalId) {
+		Response<List<OrderItemResponseDTO>> response = new Response<>();
 		
 		Order order = commonService.findOrderByExternalId(orderExternalId);
 		
 		if(order == null) {
 			response.setSuccess(false);
 			response.setMessage("No order found!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
-		Optional<OrderItem> orderItem = repo.findByOrder(order);
+		Optional<List<OrderItem>> orderItem = repo.findByOrder(order);
 		
 		if(orderItem.isEmpty()) {
 			response.setSuccess(false);
-			response.setMessage("No order item (with given id) found!!");
-			return ResponseEntity.ok().body(response);
+			response.setMessage("No order items (with given id) found!!");
+			return response;
 		}
+
+		List<OrderItemResponseDTO> orderItemDtos = new ArrayList<>();
+
+		List<OrderItem> orderItems = orderItem.get();
+		orderItems.forEach(item -> orderItemDtos.add(commonService.convertOrderItemToOrderItemResponseDTO(item)));
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDER_ITEM_RETRIEVED_SUCCESSFULLY);
-		response.setResponseData(orderItem.get());
+		response.setResponseData(orderItemDtos);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
 }

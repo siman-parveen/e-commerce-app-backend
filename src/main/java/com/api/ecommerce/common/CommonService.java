@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.dto.request.AddressRequestDTO;
@@ -66,14 +67,36 @@ public class CommonService {
 	
 	@Autowired
 	private OrderRepo orderRepo;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	public boolean isUpdated(Object oldValue, Object newValue) {
+		if (oldValue == null) {
+			return newValue != null;
+		}
+		if (newValue == null) {
+			return false;
+		}
 		return (!oldValue.equals(newValue));
+	}
+
+	public String encodePassword(String rawPassword) {
+		if (rawPassword == null || rawPassword.trim().isEmpty()) {
+			return rawPassword;
+		}
+		return passwordEncoder.encode(rawPassword);
+	}
+
+	public boolean passwordMatches(String rawPassword, String encodedPassword) {
+		if (rawPassword == null || encodedPassword == null) {
+			return false;
+		}
+		return passwordEncoder.matches(rawPassword, encodedPassword);
 	}
 	
 	public Product findProductByExternalId(String productExternalId) {
-		Optional<Product> product = productRepo.findByExternalId(productExternalId);
-        return product.orElse(null);
+		return productRepo.findByExternalId(productExternalId).orElse(null);
     }
 	
 	public User findUserByExternalId(String userExternalId) {
@@ -103,6 +126,8 @@ public class CommonService {
 		product.setDescription(productDto.getDescription());
 		product.setPrice(productDto.getPrice());
 		product.setStock(productDto.getStock());
+		product.setDiscountPercentage(productDto.getDiscountPercentage() == null ? 0 : productDto.getDiscountPercentage());
+		product.setActive(true);
 		return product;
 	}
 
@@ -112,7 +137,7 @@ public class CommonService {
 		user.setExternalId(generateExternalIdForEntities("USR"));
 		user.setEmailId(userDto.getEmailId());
 		user.setPhoneNumber(userDto.getPhoneNumber());
-		user.setPassword(userDto.getPassword());
+		user.setPassword(encodePassword(userDto.getPassword()));
 		return user;
 	}
 	
@@ -148,7 +173,14 @@ public class CommonService {
 			throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, CommonConstant.PRODUCT_CANNOT_BE_NULL);
 		}
 		
-		if(product.getStock() <= 0) {
+		if (!product.isActive()) {
+			throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Product is no longer available");
+		}
+		if (item.getQuantity() == null || item.getQuantity() < 1) {
+			throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Quantity must be at least 1");
+		}
+		
+		if(product.getStock() <= 0 || item.getQuantity() > product.getStock()) {
 			throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Product not available at the moment");
 		}
 		
@@ -165,9 +197,51 @@ public class CommonService {
 		orderItem.setReturnRequested(false);
 		orderItem.setReturnStatus(ReturnStatus.NONE);
 		orderItem.setUnitPrice(product.getPrice());
-		orderItem.setTotalPrice(BigDecimal.valueOf(product.getPrice().doubleValue()*item.getQuantity()));
+		orderItem.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
 		return orderItem;
 		
+	}
+
+	public void validateStockForQuantity(Product product, Integer requestedQuantity) {
+		if (product == null) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, CommonConstant.PRODUCT_CANNOT_BE_NULL);
+		}
+		if (requestedQuantity == null || requestedQuantity < 1) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Quantity must be at least 1");
+		}
+		if (product.getStock() < requestedQuantity) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, String.format("Only %d units available for product %s", product.getStock(), product.getProductName()));
+		}
+	}
+
+	public void reserveStockForOrderItems(List<OrderItem> orderItems) {
+		if (orderItems == null || orderItems.isEmpty()) {
+			return;
+		}
+		for (OrderItem item : orderItems) {
+			if (item == null || item.getProduct() == null) {
+				continue;
+			}
+			Product product = item.getProduct();
+			validateStockForQuantity(product, item.getQuantity());
+			product.setStock(product.getStock() - item.getQuantity());
+		}
+	}
+
+	public void releaseStockForOrderItems(List<OrderItem> orderItems) {
+		if (orderItems == null || orderItems.isEmpty()) {
+			return;
+		}
+		for (OrderItem item : orderItems) {
+			if (item == null || item.getProduct() == null) {
+				continue;
+			}
+			Product product = item.getProduct();
+			if (item.getQuantity() == null || item.getQuantity() < 1) {
+				continue;
+			}
+			product.setStock(product.getStock() + item.getQuantity());
+		}
 	}
 	
 	public String generateExternalIdForEntities(String prefix) {
@@ -283,7 +357,7 @@ public class CommonService {
 		dto.setCartItemResponseDto(cartItems);
 		
 		dto.setTotalAmount(cartItems.stream()
-				.map(item -> BigDecimal.valueOf(item.getQuantity() * item.getPrice().doubleValue()))
+				.map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
 				.reduce(BigDecimal.ZERO, BigDecimal::add));
 		
 		dto.setUserExternalId(cart.getUser().getExternalId());
@@ -327,7 +401,7 @@ public class CommonService {
 		dto.setDescription(product.getDescription());
 		dto.setPrice(product.getPrice());
 		dto.setTotalRating(calculateProductRating(product.getReviews()));
-		dto.setDiscountPercentage(0);
+		dto.setDiscountPercentage(product.getDiscountPercentage());
 		return dto;
 		
 	}

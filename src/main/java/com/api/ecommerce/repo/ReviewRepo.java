@@ -15,6 +15,8 @@ public interface ReviewRepo extends JpaRepository<Review, Long> {
 
 	List<Review> findByProduct_EntityId(Long entityId);
 
+	Optional<Review> findByUser_EntityIdAndProduct_EntityId(Long userEntityId, Long productEntityId);
+
 	Optional<Review> findByExternalId(String reviewExternalId);
 
 }

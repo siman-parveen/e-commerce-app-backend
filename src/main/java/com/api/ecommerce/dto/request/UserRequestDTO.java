@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class UserRequestDTO {
     @Schema(description = "Phone number in E.164 format", nullable = true)
     private String phoneNumber;
 
+    @NotNull(message = "Password cannot be null")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 }

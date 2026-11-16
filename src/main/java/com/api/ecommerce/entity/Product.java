@@ -4,14 +4,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
@@ -39,6 +34,17 @@ public class Product {
 	@PositiveOrZero
 	@Column(nullable = false)
 	private Integer stock;
+
+	@Min(0)
+	@Max(100)
+	@Column(nullable = false)
+	private int discountPercentage;
+
+	@Column(nullable = false)
+	private boolean active = true;
+
+	@Version
+	private Long version;
 	
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OrderItem> orderItems = new ArrayList<OrderItem>();

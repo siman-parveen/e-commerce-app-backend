@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.api.ecommerce.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.api.ecommerce.common.CommonConstant;
 import com.api.ecommerce.common.CommonService;
@@ -30,15 +30,17 @@ public class ProductServiceImpl implements ProductService {
 		this.repo = repo;
 	}
 
-	public ResponseEntity<?> retrieveAllProducts(){
+	public Response<?> retrieveAllProducts(){
 		Response<List<ProductResponseDTO>> response = new Response<>();
 				
-		List<Product> products = repo.findAll();
+		List<Product> products = repo.findAll().stream()
+				.filter(Product::isActive)
+				.toList();
 		
 		if(CollectionUtils.isEmpty(products)) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_PRODUCTS_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		List<ProductResponseDTO> productDTOList = products.stream().map((product) -> commonService.convertProductToProductResponseDTO(product)).toList();
@@ -47,18 +49,18 @@ public class ProductServiceImpl implements ProductService {
 		response.setMessage(CommonConstant.RETRIEVE_ALL_PRODUCTS_SUCCESS);
 		response.setResponseData(productDTOList);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveProductById(String productExternalId) {
+	public Response<?> retrieveProductById(String productExternalId) {
 		Response<ProductResponseDTO> response = new Response<>();
 		
 		Product product = commonService.findProductByExternalId(productExternalId);
 		
-		if(product == null) {
+		if(product == null || !product.isActive()) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_PRODUCT_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		ProductResponseDTO productDto = commonService.convertProductToProductResponseDTO(product);
@@ -67,10 +69,10 @@ public class ProductServiceImpl implements ProductService {
 		response.setSuccess(true);
 		response.setResponseData(productDto);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> addProduct(ProductRequestDTO productDto) {
+	public Response<?> addProduct(ProductRequestDTO productDto) {
 		
 		Response<ProductResponseDTO> response = new Response<>();
 
@@ -81,10 +83,10 @@ public class ProductServiceImpl implements ProductService {
 		response.setSuccess(true);
 		response.setResponseData(commonService.convertProductToProductResponseDTO(product));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> updateProduct(String productExternalId, ProductRequestDTO productDto) {
+	public Response<?> updateProduct(String productExternalId, ProductRequestDTO productDto) {
 		
 		Response<ProductResponseDTO> response = new Response<>();
 			
@@ -93,7 +95,13 @@ public class ProductServiceImpl implements ProductService {
 		if(product == null) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_PRODUCT_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
+		}
+
+		if (!product.isActive()) {
+			response.setSuccess(false);
+			response.setMessage("Inactive Product.");
+			return response;
 		}
 		
 		if(productDto.getProductName() != null && commonService.isUpdated(product.getProductName(), productDto.getProductName())) {
@@ -111,6 +119,10 @@ public class ProductServiceImpl implements ProductService {
 		if(productDto.getStock() != null && commonService.isUpdated(product.getStock(), productDto.getStock())) {
 			product.setStock(productDto.getStock());
 		}
+
+		if(productDto.getDiscountPercentage() != null && commonService.isUpdated(product.getDiscountPercentage(), productDto.getDiscountPercentage())) {
+			product.setDiscountPercentage(productDto.getDiscountPercentage());
+		}
 		
 		repo.save(product);
 		
@@ -118,12 +130,12 @@ public class ProductServiceImpl implements ProductService {
 		response.setSuccess(true);
 		response.setResponseData(commonService.convertProductToProductResponseDTO(product));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> removeProduct(String productExternalId) {
-		
-		
+	@Transactional
+	public Response<?> removeProduct(String productExternalId) {
+
 		Response<ProductResponseDTO> response = new Response<>();
 
 		Product product = commonService.findProductByExternalId(productExternalId);
@@ -131,17 +143,20 @@ public class ProductServiceImpl implements ProductService {
 		if(product == null) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_PRODUCT_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
-		
-		repo.deleteById(product.getEntityId());
-		response.setMessage(CommonConstant.PRODUCT_DELETE_SUCCESS);
+
+		product.setActive(false);
+		repo.save(product);
+
 		response.setSuccess(true);
+		response.setMessage(CommonConstant.PRODUCT_DELETE_SUCCESS);
+		response.setResponseData(commonService.convertProductToProductResponseDTO(product));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveProductsBroughtByUser(String userExternalId) {
+	public Response<?> retrieveProductsBroughtByUser(String userExternalId) {
 		Response<List<ProductUserBroughtResponseDTO>> response = new Response<>();
 		
 		User user = commonService.findUserByExternalId(userExternalId);
@@ -149,12 +164,15 @@ public class ProductServiceImpl implements ProductService {
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage("User with given id not found!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 					
 		List<ProductUserBroughtResponseDTO> productDTOList = new ArrayList<>();
 
         for (Order order : user.getOrders()) {
+			if (order.getOrderStatus() == OrderStatus.CANCELLED || order.getOrderStatus() == OrderStatus.RETURNED) {
+				continue;
+			}
             for (OrderItem orderItem : order.getOrderItems()) {
                 productDTOList.add(commonService.createProductUserBroughtResponseDTO(null, user, orderItem));
             }
@@ -175,14 +193,14 @@ public class ProductServiceImpl implements ProductService {
         if(productDTOList.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("No Products brought by the user yet!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		response.setSuccess(true);
 		response.setMessage("All Products brought by the user are fetched successfully!!");
 		response.setResponseData(productDTOList);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
 }

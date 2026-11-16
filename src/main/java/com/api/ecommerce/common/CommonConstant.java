@@ -26,8 +26,8 @@ public class CommonConstant {
 	
 	public static final String ORDERS_RETRIEVED_SUCCESS_FOR_USER = "Orders retrieved successfully for user!!";
 	public static final String ORDER_RETRIEVED_SUCCESS_FOR_USER = "Order retrieved successfully for user!!";
-	public static final String ORDER_CREATED_SUCCESS_FOR_USER = "Order created successfully for user!!";
-	public static final String ORDER_DELETED_SUCCESS_FOR_USER = "Order removed successfully for user!";
+	public static final String ORDER_CREATED_SUCCESS_FOR_USER = "Order created.";
+	public static final String ORDER_DELETED_SUCCESS_FOR_USER = "Order cancelled.";
 	
 	public static final String ORDER_ITEM_RETRIEVED_SUCCESSFULLY = "Order Item retrieved successfully!!";
 	

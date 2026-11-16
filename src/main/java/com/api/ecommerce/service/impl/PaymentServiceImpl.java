@@ -4,23 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.api.ecommerce.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
 import com.api.ecommerce.common.CommonService;
 import com.api.ecommerce.dto.request.PaymentRequestDTO;
 import com.api.ecommerce.dto.response.PaymentResponseDTO;
-import com.api.ecommerce.entity.Order;
-import com.api.ecommerce.entity.OrderItem;
-import com.api.ecommerce.entity.OrderStatus;
-import com.api.ecommerce.entity.Payment;
-import com.api.ecommerce.entity.PaymentStatus;
-import com.api.ecommerce.entity.Product;
 import com.api.ecommerce.repo.PaymentRepo;
 import com.api.ecommerce.response.Response;
 import com.api.ecommerce.service.PaymentService;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -31,35 +26,80 @@ public class PaymentServiceImpl implements PaymentService {
 	@Autowired
 	private CommonService commonService;
 
-	public ResponseEntity<?> makePaymentForOrder(String orderExternalId, PaymentRequestDTO paymentDTO) {
+	@Transactional
+	public Response<?> makePaymentForOrder(String orderExternalId, PaymentRequestDTO paymentDTO) {
 		Response<PaymentResponseDTO> response = new Response<>();
 		
 		 Optional<Payment> paymentForTransactionId = repo.findByTransactionId(paymentDTO.getTransactionId());
 		
 		if(paymentForTransactionId.isPresent()) {
-			response.setSuccess(true);
-			response.setMessage("Payment for Transaction ID already exists");
-			response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(paymentForTransactionId.get()));
-			return ResponseEntity.ok().body(response);
+			Payment existingPayment = paymentForTransactionId.get();
+			if (existingPayment.getOrder() != null && existingPayment.getOrder().getExternalId().equals(orderExternalId)) {
+				response.setSuccess(true);
+				response.setMessage("Payment for Transaction ID already exists");
+				response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(existingPayment));
+				return response;
+			}
+			response.setSuccess(false);
+			response.setMessage("Transaction ID already used for another order");
+			return response;
 		}
 		Payment payment = commonService.makePaymentForOrder(orderExternalId, paymentDTO);
 		
 		if(payment.getPaymentStatus().equals(PaymentStatus.FAILED)) {
 			response.setSuccess(false);
 			response.setMessage("Payment failed!!");
-			return ResponseEntity.ok().body(response);
+			return response;
+		}
+
+		Order order = payment.getOrder();
+		if (order == null) {
+			response.setSuccess(false);
+			response.setMessage("No order found with given id!!");
+			return response;
+		}
+
+		if (repo.findByOrder_EntityId(order.getEntityId()).isPresent()) {
+			response.setSuccess(false);
+			response.setMessage("Payment already exists for this order");
+			return response;
+		}
+
+		if (order.getOrderStatus().equals(OrderStatus.CANCELLED) || order.getOrderStatus().equals(OrderStatus.RETURNED)) {
+			response.setSuccess(false);
+			response.setMessage("Order is no longer payable");
+			return response;
+		}
+
+		if (order.getTotalAmount().compareTo(paymentDTO.getTotalAmount()) != 0) {
+			response.setSuccess(false);
+			response.setMessage("Wrong Order Amount.");
+			return response;
 		}
 			
-		List<OrderItem> orderItems = payment.getOrder().getOrderItems();
-		
-		orderItems.forEach(item -> {
+		List<OrderItem> orderItems = order.getOrderItems();
+
+		List<String> invalidOrderItems = new ArrayList<>();
+		for (OrderItem item : orderItems) {
 			Product product = item.getProduct();
-			product.setStock(product.getStock() - item.getQuantity());
-		});
+			if (product == null) {
+				invalidOrderItems.add("Unknown Product");
+				continue;
+			}
+			if (item.getQuantity() == null || item.getQuantity() < 1 || item.getQuantity() > product.getStock()) {
+				invalidOrderItems.add(product.getProductName());
+			}
+		}
+
+		if (!invalidOrderItems.isEmpty()) {
+			response.setSuccess(false);
+			response.setMessage(String.format("Products Not Available - %s", String.join(",", invalidOrderItems)));
+			return response;
+		}
 		
+		commonService.reserveStockForOrderItems(orderItems);
 		commonService.updatePaymentStatus(payment, PaymentStatus.SUCCESS);
 
-	
 		repo.save(payment);			
 		
 		PaymentResponseDTO dto = commonService.convertPaymentToPaymentResponseDTO(payment);
@@ -68,10 +108,10 @@ public class PaymentServiceImpl implements PaymentService {
 		response.setMessage(CommonConstant.PAYMENT_CREATED_SUCCESSFULLY);
 		response.setResponseData(dto);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveAllPayments() {
+	public Response<?> retrieveAllPayments() {
 		Response<List<PaymentResponseDTO>> response = new Response<>();
 		
 		List<Payment> payments = repo.findAll();
@@ -79,7 +119,7 @@ public class PaymentServiceImpl implements PaymentService {
 		if(payments.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("No payment received!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		List<PaymentResponseDTO> paymentList = new ArrayList<>();
@@ -92,10 +132,10 @@ public class PaymentServiceImpl implements PaymentService {
 		response.setMessage("Payments retrieved successfully!!");
 		response.setResponseData(paymentList);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrievePaymentForOrder(String orderExternalId) {
+	public Response<?> retrievePaymentForOrder(String orderExternalId) {
 		Response<PaymentResponseDTO> response = new Response<>();
 		
 		Order order = commonService.findOrderByExternalId(orderExternalId);
@@ -103,7 +143,7 @@ public class PaymentServiceImpl implements PaymentService {
 		if(order == null) {
 			response.setSuccess(false);
 			response.setMessage("No order found with given user id!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		Optional<Payment> payment = repo.findByOrder_EntityId(order.getEntityId());
@@ -111,17 +151,18 @@ public class PaymentServiceImpl implements PaymentService {
 		if(payment.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("Payment not yet made for the order!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		} 
 		
 		response.setSuccess(true);
 		response.setMessage("Payment retrieved successfully");
 		response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(payment.get()));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> refundPayment(String orderExternalId) {
+	@Transactional
+	public Response<PaymentResponseDTO> refundPayment(String orderExternalId) {
 		Response<PaymentResponseDTO> response = new Response<>();
 		
 		Order order = commonService.findOrderByExternalId(orderExternalId);
@@ -129,35 +170,44 @@ public class PaymentServiceImpl implements PaymentService {
 		if(order == null) {
 			response.setSuccess(false);
 			response.setMessage("No order found with given user id!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
-		
-		if(!order.getOrderStatus().equals(OrderStatus.CANCELLED)) {
+
+		if(!order.getOrderStatus().equals(OrderStatus.DELIVERED)) {
 			response.setSuccess(false);
-			response.setMessage("Order is not yet cancelled!!");
-			return ResponseEntity.ok().body(response);
+			response.setMessage("Order is not yet delivered!!");
+			return response;
 		}
-		
+
 		Optional<Payment> orderPayment = repo.findByOrder_EntityId(order.getEntityId());
-		
+
 		if(orderPayment.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("Payment not yet made for the order!!");
-			return ResponseEntity.ok().body(response);
-		} 
-		
-		
+			return response;
+		}
+
 		Payment payment = orderPayment.get();
+		if (payment.getPaymentStatus().equals(PaymentStatus.REFUNDED) || order.getOrderStatus().equals(OrderStatus.RETURNED)) {
+			response.setSuccess(false);
+			response.setMessage("Order payment already refunded");
+			return response;
+		}
 		payment.setPaymentStatus(PaymentStatus.REFUNDED);
-		
+		commonService.releaseStockForOrderItems(order.getOrderItems());
+		order.setOrderStatus(OrderStatus.RETURNED);
+		payment.setOrder(order);
+		repo.save(payment);
+
 		response.setSuccess(true);
 		response.setMessage("Order Payment refunded successfully");
 		response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(payment));
-		
-		return ResponseEntity.ok().body(response);
+
+		return response;
 	}
-	
-	public ResponseEntity<?> refundPaymentByTransactionIdd(String transactionId) {
+
+	@Transactional
+	public Response<PaymentResponseDTO> refundPaymentByTransactionId(String transactionId) {
 		Response<PaymentResponseDTO> response = new Response<>();
 		
 		Optional<Payment> orderPayment = repo.findByTransactionId(transactionId);
@@ -165,32 +215,41 @@ public class PaymentServiceImpl implements PaymentService {
 		if(orderPayment.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("No order found with the given transaction ID!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		} 
 		
 		Payment payment = orderPayment.get();
 
 		Order order = payment.getOrder();
 		
-		if(order == null) {
+		if (order == null) {
 			response.setSuccess(false);
 			response.setMessage("No order found with given user id!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
-		
-		if(!order.getOrderStatus().equals(OrderStatus.CANCELLED)) {
+
+		if (!order.getOrderStatus().equals(OrderStatus.DELIVERED)) {
 			response.setSuccess(false);
-			response.setMessage("Order is not yet cancelled!!");
-			return ResponseEntity.ok().body(response);
+			response.setMessage("Order is not yet delivered!!");
+			return response;
 		}
-		
+		if (payment.getPaymentStatus().equals(PaymentStatus.REFUNDED) || order.getOrderStatus().equals(OrderStatus.RETURNED)) {
+			response.setSuccess(false);
+			response.setMessage("Order payment already refunded");
+			return response;
+		}
+
 		payment.setPaymentStatus(PaymentStatus.REFUNDED);
-		
+		commonService.releaseStockForOrderItems(order.getOrderItems());
+		order.setOrderStatus(OrderStatus.RETURNED);
+		payment.setOrder(order);
+		repo.save(payment);
+
 		response.setSuccess(true);
 		response.setMessage("Transaction refunded.");
 		response.setResponseData(commonService.convertPaymentToPaymentResponseDTO(payment));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
 }

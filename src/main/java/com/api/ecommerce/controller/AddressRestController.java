@@ -1,5 +1,7 @@
 package com.api.ecommerce.controller;
 
+import com.api.ecommerce.response.Response;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.api.ecommerce.dto.request.AddressRequestDTO;
 import com.api.ecommerce.service.AddressService;
@@ -28,26 +31,34 @@ public class AddressRestController {
 	
 	@Operation(summary = "Retrieve addresses for a user", description = "Returns the saved addresses associated with the specified user.")
 	@GetMapping("/user/{userExternalId}/address")
+	@PreAuthorize("@userAuthorization.isCurrentUser(#p0)")
 	public ResponseEntity<?> retrieveAddressForUser(@PathVariable String userExternalId) {
-		return service.retrieveAddressForUser(userExternalId);
+		Response<?> response = service.retrieveAddressForUser(userExternalId);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Retrieve addresses for a user", description = "Returns the saved addresses associated with the specified user.")
 	@PostMapping("/user/address")
+	@PreAuthorize("@userAuthorization.isCurrentUser(#p0.userExternalId)")
 	public ResponseEntity<?> addUserAddress(@Valid @RequestBody AddressRequestDTO addressDto) {
-		return service.addUserAddress(addressDto);
+		Response<?> response = service.addUserAddress(addressDto);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Update a saved address", description = "Updates the address identified by its external ID using the supplied details.")
 	@PatchMapping("/user/address/{addressExternalId}")
+	@PreAuthorize("@userAuthorization.ownsAddress(#p0)")
 	public ResponseEntity<?> updateUserAddress(@PathVariable String addressExternalId, @Valid @RequestBody AddressRequestDTO addressDto) {
-		return service.updateUserAddress(addressExternalId, addressDto);
+		Response<?> response = service.updateUserAddress(addressExternalId, addressDto);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Delete a saved address", description = "Deletes the address identified by its external ID.")
 	@DeleteMapping("/user/address/{addressExternalId}")
+	@PreAuthorize("@userAuthorization.ownsAddress(#p0)")
 	public ResponseEntity<?> deleteUserAddress(@PathVariable String addressExternalId) {
-		return service.deleteUserAddress(addressExternalId);
+		Response<?> response = service.deleteUserAddress(addressExternalId);
+		return ResponseEntity.ok().body(response);
 	}
 
 }
