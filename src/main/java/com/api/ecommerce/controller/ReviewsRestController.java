@@ -1,5 +1,7 @@
 package com.api.ecommerce.controller;
 
+import com.api.ecommerce.response.Response;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import com.api.ecommerce.service.ReviewService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api")
@@ -29,43 +32,54 @@ public class ReviewsRestController {
 	@Operation(summary = "Retrieve All Review", description = "API returns all the reviews given by all user")
 	@GetMapping("/admin/reviews")
 	public ResponseEntity<?> retrieveAllReviews() {
-		return service.retrieveAllReviews();
+		Response<?> response = service.retrieveAllReviews();
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Retrieve Review given by user", description = "API returns all the reviews given by a user")
 	@GetMapping("/user/{userExternalId}/reviews")
+	@PreAuthorize("@userAuthorization.isCurrentUser(#p0)")
 	public ResponseEntity<?> retrieveReviewsGivenByUser(@PathVariable String userExternalId) {
-		return service.retrieveReviewsGivenByUser(userExternalId);
+		Response<?> response = service.retrieveReviewsGivenByUser(userExternalId);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Retrieve Review given to  product", description = "API returns all the reviews given to a product")
 	@GetMapping("/product/{productExternalId}/reviews")
 	public ResponseEntity<?> retrieveReviewsGivenToProduct(@PathVariable String productExternalId) {
-		return service.retrieveReviewsGivenToProduct(productExternalId);
+		Response<?> response = service.retrieveReviewsGivenToProduct(productExternalId);
+		return ResponseEntity.ok().body(response);
 	}
 
 	@Operation(summary = "Add a review to a product", description = "API adds a review to a product by a user")
 	@PostMapping("/user/product/review")
+	@PreAuthorize("@userAuthorization.isCurrentUser(#p0.userExternalId)")
 	public ResponseEntity<?> addReviewToProductByUser(@Valid @RequestBody ReviewRequestDTO review) {
-		return service.addReviewToProductByUser(review);
+		Response<?> response = service.addReviewToProductByUser(review);
+		return ResponseEntity.ok().body(response);
 	}
 
 	@Operation(summary = "Update the review to the product", description = "API updates the review to the product by a user")
 	@PatchMapping("/user/product/review/{reviewExternalId}")
+	@PreAuthorize("@userAuthorization.ownsReview(#p0) and @userAuthorization.isCurrentUser(#p1.userExternalId)")
 	public ResponseEntity<?> updateReviewToProductByUser(@PathVariable String reviewExternalId, @Valid @RequestBody ReviewRequestDTO review) {
-		return service.updateReviewToProductByUser(reviewExternalId, review);
+		Response<?> response = service.updateReviewToProductByUser(reviewExternalId, review);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Delete the review to the product", description = "API deletes the review")
 	@DeleteMapping("/user/product/review/{reviewExternalId}")
+	@PreAuthorize("@userAuthorization.ownsReview(#p0)")
 	public ResponseEntity<?> deleteReview(@PathVariable String reviewExternalId){
-		return service.deleteReview(reviewExternalId);
+		Response<?> response = service.deleteReview(reviewExternalId);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Retrieve Review by External ID", description = "API retrieves the review by the given external id")
 	@GetMapping("/public/product/review/{reviewExternalId}")
 	public ResponseEntity<?> retrieveReviewByExternalId(@PathVariable String reviewExternalId){
-		return service.retrieveReviewByExternalId(reviewExternalId);
+		Response<?> response = service.retrieveReviewByExternalId(reviewExternalId);
+		return ResponseEntity.ok().body(response);
 	}
 
 }

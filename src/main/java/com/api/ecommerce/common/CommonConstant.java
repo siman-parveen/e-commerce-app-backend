@@ -6,7 +6,7 @@ public class CommonConstant {
 	
 	public final static String RETRIEVE_ALL_PRODUCTS_SUCCESS = "Products retrieved successfully!!";
 	public final static String NO_PRODUCTS_FOUND = "No Products available!!";
-	public final static String RETRIVE_PRODUCT_SUCCESS = "Product retrieved successfully!!";
+	public final static String RETRIEVE_PRODUCT_SUCCESS = "Product retrieved successfully!!";
 	public final static String NO_PRODUCT_FOUND = "Product not found!!";
 	
 	public final static String PRODUCT_ADDED_SUCCESS = "Product added successfully!!";
@@ -15,7 +15,7 @@ public class CommonConstant {
 	
 	public final static String RETRIEVE_ALL_USERS_SUCCESS = "Users retrieved successfully!!";
 	public final static String NO_USERS_FOUND = "No Users available!!";
-	public final static String RETRIVE_USER_SUCCESS = "User retrieved successfully!!";
+	public final static String RETRIEVE_USER_SUCCESS = "User retrieved successfully!!";
 	public final static String NO_USER_FOUND = "User not found!!";
 	
 	public final static String USER_ADDED_SUCCESS = "User registered successfully!!";
@@ -26,8 +26,8 @@ public class CommonConstant {
 	
 	public static final String ORDERS_RETRIEVED_SUCCESS_FOR_USER = "Orders retrieved successfully for user!!";
 	public static final String ORDER_RETRIEVED_SUCCESS_FOR_USER = "Order retrieved successfully for user!!";
-	public static final String ORDER_CREATED_SUCCESS_FOR_USER = "Order created successfully for user!!";
-	public static final String ORDER_DELETED_SUCCESS_FOR_USER = "Order removed successfully for user!";
+	public static final String ORDER_CREATED_SUCCESS_FOR_USER = "Order created.";
+	public static final String ORDER_DELETED_SUCCESS_FOR_USER = "Order cancelled.";
 	
 	public static final String ORDER_ITEM_RETRIEVED_SUCCESSFULLY = "Order Item retrieved successfully!!";
 	

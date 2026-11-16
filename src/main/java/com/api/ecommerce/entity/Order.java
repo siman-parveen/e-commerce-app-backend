@@ -16,8 +16,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.Data;
 
 @Entity(name = "orders")
+@Data
 public class Order {
 	
 	@Id
@@ -57,94 +59,4 @@ public class Order {
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OrderItem> orderItems = new ArrayList<>();
 	
-	public Order() {}
-
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public BigDecimal getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(BigDecimal totalAmount) {
-		this.totalAmount = totalAmount;
-	}
-
-	public BigDecimal getDeductions() {
-		return deductions;
-	}
-
-	public void setDeductions(BigDecimal deductions) {
-		this.deductions = deductions;
-	}
-
-	public LocalDateTime getOrderDate() {
-		return orderDate;
-	}
-
-	public void setOrderDate(LocalDateTime orderDate) {
-		this.orderDate = orderDate;
-	}
-
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-
-	public OrderStatus getOrderStatus() {
-		return orderStatus;
-	}
-
-	public void setOrderStatus(OrderStatus orderStatus) {
-		this.orderStatus = orderStatus;
-	}
-
-	public UserAddress getDeliveryAddress() {
-		return deliveryAddress;
-	}
-
-	public void setDeliveryAddress(UserAddress deliveryAddress) {
-		this.deliveryAddress = deliveryAddress;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public List<OrderItem> getOrderItems() {
-		return orderItems;
-	}
-
-	public void setOrderItems(List<OrderItem> orderItems) {
-		this.orderItems = orderItems;
-	}
-
-	public String getOrderReceiverName() {
-		return orderReceiverName;
-	}
-
-	public void setOrderReceiverName(String orderReceiverName) {
-		this.orderReceiverName = orderReceiverName;
-	}
-
 }

@@ -8,8 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Positive;
+import lombok.Data;
 
 @Entity
+@Data
 public class CartItem {
 	
 	@Id
@@ -29,47 +31,5 @@ public class CartItem {
 	@ManyToOne
     @JoinColumn(name = "cart_id")
 	private Cart cart;
-	
-	public CartItem() {}
 
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
-	public Integer getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
-	}
-
-	public Product getProduct() {
-		return product;
-	}
-
-	public void setProduct(Product product) {
-		this.product = product;
-	}
-
-	public Cart getCart() {
-		return cart;
-	}
-
-	public void setCart(Cart cart) {
-		this.cart = cart;
-	}
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-	
 }

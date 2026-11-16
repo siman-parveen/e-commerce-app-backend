@@ -10,7 +10,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Data;
 
+@Data
 public class PaymentRequestDTO {
 	
 	@NotBlank(message = "Transaction ID is required")
@@ -31,38 +33,4 @@ public class PaymentRequestDTO {
     @Schema(description = "External ID of the order")
     private String orderExternalId;
 
-	public PaymentRequestDTO() {}
-
-	public String getTransactionId() {
-		return transactionId;
-	}
-
-	public void setTransactionId(String transactionId) {
-		this.transactionId = transactionId;
-	}
-
-	public BigDecimal getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(BigDecimal totalAmount) {
-		this.totalAmount = totalAmount;
-	}
-
-	public PaymentMode getPaymentMode() {
-		return paymentMode;
-	}
-
-	public void setPaymentMode(PaymentMode paymentMode) {
-		this.paymentMode = paymentMode;
-	}
-
-	public String getOrderExternalId() {
-		return orderExternalId;
-	}
-
-	public void setOrderExternalId(String orderExternalId) {
-		this.orderExternalId = orderExternalId;
-	}
-	
 }

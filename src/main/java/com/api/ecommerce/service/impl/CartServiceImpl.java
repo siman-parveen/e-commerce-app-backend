@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
@@ -27,7 +26,7 @@ public class CartServiceImpl implements CartService {
 	@Autowired
 	private CommonService commonService;
 
-	public ResponseEntity<?> retrieveCartForUser(String userExternalId) {
+	public Response<?> retrieveCartForUser(String userExternalId) {
 		
 		Response<CartResponseDTO> response = new Response<>();
 		
@@ -36,7 +35,7 @@ public class CartServiceImpl implements CartService {
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage("User not found!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 
 		Optional<Cart> cartFound = cartRepo.findByUser(user);
@@ -44,7 +43,7 @@ public class CartServiceImpl implements CartService {
 		if(cartFound.isEmpty()) {
 			response.setSuccess(false);
 	        response.setMessage("No cart found for the user!!");
-	        return ResponseEntity.ok().body(response);
+	        return response;
 		}
 		
 		CartResponseDTO cartDto = commonService.convertCartToCartResponseDTO(cartFound.get());
@@ -52,17 +51,17 @@ public class CartServiceImpl implements CartService {
 		if(cartDto.getCartItemCount() == 0) {
 			response.setSuccess(false);
 	        response.setMessage("No product added to the cart yet!!");
-	        return ResponseEntity.ok().body(response);
+	        return response;
 		}
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.CART_RETRIEVED_SUCCESS_FOR_USER);
-		response.setData(cartDto);
+		response.setResponseData(cartDto);
 		
-		return ResponseEntity.ok().body(response);	
+		return response;
 	}
 
-	public ResponseEntity<?> addItemToCart(String userExternalId, String productExternalId, Integer quantity) {
+	public Response<?> addItemToCart(String userExternalId, String productExternalId, Integer quantity) {
 		Response<CartResponseDTO> response = new Response<>();
 		
 		User user = commonService.findUserByExternalId(userExternalId);
@@ -70,25 +69,30 @@ public class CartServiceImpl implements CartService {
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage("User not found!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		Product product = commonService.findProductByExternalId(productExternalId);
 		
-		if(product == null) {
+		if(product == null || !product.isActive()) {
 			response.setSuccess(false);
 			response.setMessage("Product not found!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		if(product.getStock() <= 0) {
 			response.setSuccess(false);
 			response.setMessage("Product not available at the moment!!");
-			return ResponseEntity.ok().body(response);
+			return response;
+		}
+		if (quantity == null || quantity < 1) {
+			response.setSuccess(false);
+			response.setMessage("Quantity must be at least 1");
+			return response;
 		}
 		
 		Optional<Cart> cartFound = cartRepo.findByUser(user);
-		Cart cart = null;
+		Cart cart;
 		if(cartFound.isEmpty()) {
 			cart = new Cart();
 			cart.setExternalId(commonService.generateExternalIdForEntities("CRT"));
@@ -105,8 +109,19 @@ public class CartServiceImpl implements CartService {
 		 
 		 if(existingCartItem.isPresent()) {
 			 cartItem = existingCartItem.get();
-			 cartItem.setQuantity(cartItem.getQuantity() + quantity);
+			 int updatedQuantity = cartItem.getQuantity() + quantity;
+			 if (updatedQuantity > product.getStock()) {
+				 response.setSuccess(false);
+				 response.setMessage(String.format("Only %d units available for this product", product.getStock()));
+				 return response;
+			 }
+			 cartItem.setQuantity(updatedQuantity);
 		 } else {
+			 if (quantity > product.getStock()) {
+				 response.setSuccess(false);
+				 response.setMessage(String.format("Only %d units available for this product", product.getStock()));
+				 return response;
+		 	}
 			 cartItem = new CartItem();
 			 cartItem.setExternalId(commonService.generateExternalIdForEntities("CRTITM"));
 			 cartItem.setCart(cart);
@@ -119,22 +134,22 @@ public class CartServiceImpl implements CartService {
 		 
 		 response.setSuccess(true);
 		 response.setMessage("Item added to cart!!");
-		 response.setData(commonService.convertCartToCartResponseDTO(cart));
+		 response.setResponseData(commonService.convertCartToCartResponseDTO(cart));
 		
-		return ResponseEntity.ok().body(response);	
+		return response;
 	}
 	
 	
-	public ResponseEntity<?> clearCart(String userExternalId){
+	public Response<?> clearCart(String userExternalId){
 		
-		Response<Cart> response = new Response<Cart>();
+		Response<Cart> response = new Response<>();
 		
 		User user = commonService.findUserByExternalId(userExternalId);
 		
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage("User not found!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		Optional<Cart> cartFound = cartRepo.findByUser(user);
@@ -142,7 +157,7 @@ public class CartServiceImpl implements CartService {
 		if(cartFound.isEmpty()) {
 			response.setSuccess(false);
 	        response.setMessage("No cart found for the user!!");
-	        return ResponseEntity.ok().body(response);
+	        return response;
 		}
 		
 		Cart cart = cartFound.get();
@@ -153,9 +168,9 @@ public class CartServiceImpl implements CartService {
 		
 		response.setSuccess(true);
 		response.setMessage("Cart is cleared!!");
-		response.setData(cart);
+		response.setResponseData(cart);
 			
-		return ResponseEntity.ok().body(response);
+		return response;
 		
 	}
 }

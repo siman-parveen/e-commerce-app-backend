@@ -120,9 +120,25 @@ A commented MySQL configuration is also present in `application.properties` for
 local customization. Keep real database credentials out of source control before
 using this project beyond local development.
 
-The Spring Security dependency is currently commented out in `pom.xml`, so this
-README documents the API as a local development backend without an authentication
-flow.
+### Authentication and authorization
+
+The API uses cookie-backed sessions. User login and signup establish a session,
+and the React app sends the session cookie with API requests. Requests that change
+state include a CSRF token fetched from `/api/auth/csrf`. Configure the admin
+account on the backend using environment variables; there are no default admin
+credentials:
+
+```powershell
+$env:ADMIN_EMAIL = "admin@example.com"
+$env:ADMIN_PASSWORD = "<secret>"
+.\mvnw.cmd spring-boot:run
+```
+
+Do not commit these values or expose them as React build-time variables.
+`/api/public/**` and product review listing endpoints are public, `/api/admin/**`
+requires the configured admin account, and `/api/user/**` requires a registered
+user session. User operations that reference an external ID or an owned record
+are limited to the currently authenticated user. Login and signup are public.
 
 ## Response Format
 
@@ -167,7 +183,8 @@ Validation and application errors are returned by the global exception handler:
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/user/all` | List all users |
+| `GET` | `/api/admin/users` | List all users |
+| `GET` | `/api/admin/users/{userExternalId}` | Get a user by ID as admin |
 | `GET` | `/api/user/{userExternalId}` | Get a user by external ID |
 | `POST` | `/api/user/signup` | Register a new user |
 | `POST` | `/api/user/login` | Log in with email and password |
@@ -279,7 +296,7 @@ START, PENDING, SUCCESS, FAILED, REFUNDED
   "addressLine": "221B Baker Street",
   "city": "London",
   "state": "London",
-  "pincode": "123456",
+  "pinCode": "123456",
   "country": "United Kingdom",
   "userExternalId": "user-external-id"
 }
@@ -349,5 +366,3 @@ START, PENDING, SUCCESS, FAILED, REFUNDED
 - External IDs are used in the public API instead of internal database IDs.
 - Swagger UI is the easiest way to explore request and response schemas while
   the application is running.
-- Add authentication and authorization before exposing admin routes outside a
-  local development environment.

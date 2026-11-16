@@ -1,12 +1,13 @@
 package com.api.ecommerce.service;
 
-import org.springframework.http.ResponseEntity;
+import com.api.ecommerce.response.Response;
+
 
 import com.api.ecommerce.dto.request.AddressRequestDTO;
 
 public interface AddressService {
-	public ResponseEntity<?> addUserAddress(AddressRequestDTO addressDto);
-	public ResponseEntity<?> updateUserAddress(String addressExternalId, AddressRequestDTO addressDto);
-	public ResponseEntity<?> deleteUserAddress(String addressExternalId);
-	public ResponseEntity<?> retrieveAddressForUser(String userExternalId);
+	public Response<?> addUserAddress(AddressRequestDTO addressDto);
+	public Response<?> updateUserAddress(String addressExternalId, AddressRequestDTO addressDto);
+	public Response<?> deleteUserAddress(String addressExternalId);
+	public Response<?> retrieveAddressForUser(String userExternalId);
 }

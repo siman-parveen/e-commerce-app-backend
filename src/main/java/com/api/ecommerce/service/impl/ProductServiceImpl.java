@@ -2,25 +2,26 @@ package com.api.ecommerce.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.api.ecommerce.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.api.ecommerce.common.CommonConstant;
 import com.api.ecommerce.common.CommonService;
 import com.api.ecommerce.dto.request.ProductRequestDTO;
 import com.api.ecommerce.dto.response.ProductResponseDTO;
 import com.api.ecommerce.dto.response.ProductUserBroughtResponseDTO;
-import com.api.ecommerce.entity.Product;
-import com.api.ecommerce.entity.User;
 import com.api.ecommerce.repo.ProductRepo;
 import com.api.ecommerce.response.Response;
 import com.api.ecommerce.service.ProductService;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
-	private ProductRepo repo;
+	private final ProductRepo repo;
 	
 	@Autowired
 	private CommonService commonService;
@@ -29,70 +30,78 @@ public class ProductServiceImpl implements ProductService {
 		this.repo = repo;
 	}
 
-	public ResponseEntity<?> retrieveAllProducts(){
-		Response<List<ProductResponseDTO>> response = new Response<List<ProductResponseDTO>>();
+	public Response<?> retrieveAllProducts(){
+		Response<List<ProductResponseDTO>> response = new Response<>();
 				
-		List<Product> products = repo.findAll();
+		List<Product> products = repo.findAll().stream()
+				.filter(Product::isActive)
+				.toList();
 		
-		if(products == null || products.isEmpty()) {
+		if(CollectionUtils.isEmpty(products)) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_PRODUCTS_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		List<ProductResponseDTO> productDTOList = products.stream().map((product) -> commonService.convertProductToProductResponseDTO(product)).toList();
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.RETRIEVE_ALL_PRODUCTS_SUCCESS);
-		response.setData(productDTOList);
+		response.setResponseData(productDTOList);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveProductById(String productExternalId) {
-		Response<ProductResponseDTO> response = new Response<ProductResponseDTO>();
+	public Response<?> retrieveProductById(String productExternalId) {
+		Response<ProductResponseDTO> response = new Response<>();
 		
 		Product product = commonService.findProductByExternalId(productExternalId);
 		
-		if(product == null) {
+		if(product == null || !product.isActive()) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_PRODUCT_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		ProductResponseDTO productDto = commonService.convertProductToProductResponseDTO(product);
 		
-		response.setMessage(CommonConstant.RETRIVE_PRODUCT_SUCCESS);
+		response.setMessage(CommonConstant.RETRIEVE_PRODUCT_SUCCESS);
 		response.setSuccess(true);
-		response.setData(productDto);
+		response.setResponseData(productDto);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> addProduct(ProductRequestDTO productDto) {
+	public Response<?> addProduct(ProductRequestDTO productDto) {
 		
-		Response<ProductResponseDTO> response = new Response<ProductResponseDTO>();
+		Response<ProductResponseDTO> response = new Response<>();
 
 		Product product = commonService.convertProductRequestDTOToProduct(productDto);
 		repo.save(product);
 		
 		response.setMessage(CommonConstant.PRODUCT_ADDED_SUCCESS);
 		response.setSuccess(true);
-		response.setData(commonService.convertProductToProductResponseDTO(product));
+		response.setResponseData(commonService.convertProductToProductResponseDTO(product));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> updateProduct(String productExternalId, ProductRequestDTO productDto) {
+	public Response<?> updateProduct(String productExternalId, ProductRequestDTO productDto) {
 		
-		Response<ProductResponseDTO> response = new Response<ProductResponseDTO>();
+		Response<ProductResponseDTO> response = new Response<>();
 			
 		Product product = commonService.findProductByExternalId(productExternalId);
 		
 		if(product == null) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_PRODUCT_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
+		}
+
+		if (!product.isActive()) {
+			response.setSuccess(false);
+			response.setMessage("Inactive Product.");
+			return response;
 		}
 		
 		if(productDto.getProductName() != null && commonService.isUpdated(product.getProductName(), productDto.getProductName())) {
@@ -110,78 +119,88 @@ public class ProductServiceImpl implements ProductService {
 		if(productDto.getStock() != null && commonService.isUpdated(product.getStock(), productDto.getStock())) {
 			product.setStock(productDto.getStock());
 		}
+
+		if(productDto.getDiscountPercentage() != null && commonService.isUpdated(product.getDiscountPercentage(), productDto.getDiscountPercentage())) {
+			product.setDiscountPercentage(productDto.getDiscountPercentage());
+		}
 		
 		repo.save(product);
 		
 		response.setMessage(CommonConstant.PRODUCT_UPDATE_SUCCESS);
 		response.setSuccess(true);
-		response.setData(commonService.convertProductToProductResponseDTO(product));
+		response.setResponseData(commonService.convertProductToProductResponseDTO(product));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
-	public ResponseEntity<?> removeProduct(String productExternalId) {
-		
-		
-		Response<ProductResponseDTO> response = new Response<ProductResponseDTO>();
+	@Transactional
+	public Response<?> removeProduct(String productExternalId) {
+
+		Response<ProductResponseDTO> response = new Response<>();
 
 		Product product = commonService.findProductByExternalId(productExternalId);
 		
 		if(product == null) {
 			response.setSuccess(false);
 			response.setMessage(CommonConstant.NO_PRODUCT_FOUND);
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
-		
-		repo.deleteById(product.getEntityId());
-		response.setMessage(CommonConstant.PRODUCT_DELETE_SUCCESS);
+
+		product.setActive(false);
+		repo.save(product);
+
 		response.setSuccess(true);
+		response.setMessage(CommonConstant.PRODUCT_DELETE_SUCCESS);
+		response.setResponseData(commonService.convertProductToProductResponseDTO(product));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveProductsBroughtByUser(String userExternalId) {
-		Response<List<ProductUserBroughtResponseDTO>> response = new Response<List<ProductUserBroughtResponseDTO>>();
+	public Response<?> retrieveProductsBroughtByUser(String userExternalId) {
+		Response<List<ProductUserBroughtResponseDTO>> response = new Response<>();
 		
 		User user = commonService.findUserByExternalId(userExternalId);
 		
 		if(user == null) {
 			response.setSuccess(false);
 			response.setMessage("User with given id not found!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 					
 		List<ProductUserBroughtResponseDTO> productDTOList = new ArrayList<>();
 
-		user.getOrders().stream().forEach((order) -> {
-			order.getOrderItems().stream().forEach((orderItem) -> {
-				productDTOList.add(commonService.createProductUserBroughtResponseDTO(null, user, orderItem));
-			});
-		});
-		
-		user.getReviews().stream().forEach((review) -> {
-			productDTOList.stream().forEach(dto -> {
-				if(review.getProduct().getExternalId().equals(dto.getProductExternalId())) {
-					dto.setRatingExternalId(review.getExternalId());
-					dto.setRating(review.getRating());
-					dto.setComment(review.getComment());
-					dto.setReviewedAt(review.getReviewedAt());
-				}
-			});
-		});
+        for (Order order : user.getOrders()) {
+			if (order.getOrderStatus() == OrderStatus.CANCELLED || order.getOrderStatus() == OrderStatus.RETURNED) {
+				continue;
+			}
+            for (OrderItem orderItem : order.getOrderItems()) {
+                productDTOList.add(commonService.createProductUserBroughtResponseDTO(null, user, orderItem));
+            }
+        }
 
-		
-		if(productDTOList.isEmpty()) {
+        for (Review review : user.getReviews()) {
+            productDTOList.forEach(dto -> {
+                if (review.getProduct().getExternalId().equals(dto.getProductExternalId())) {
+                    dto.setRatingExternalId(review.getExternalId());
+                    dto.setRating(review.getRating());
+                    dto.setComment(review.getComment());
+                    dto.setReviewedAt(review.getReviewedAt());
+                }
+            });
+        }
+
+
+        if(productDTOList.isEmpty()) {
 			response.setSuccess(false);
 			response.setMessage("No Products brought by the user yet!!");
-			return ResponseEntity.ok().body(response);
+			return response;
 		}
 		
 		response.setSuccess(true);
 		response.setMessage("All Products brought by the user are fetched successfully!!");
-		response.setData(productDTOList);
+		response.setResponseData(productDTOList);
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 	
 }

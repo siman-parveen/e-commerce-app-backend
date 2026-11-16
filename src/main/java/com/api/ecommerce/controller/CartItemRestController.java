@@ -1,5 +1,7 @@
 package com.api.ecommerce.controller;
 
+import com.api.ecommerce.response.Response;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -8,9 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.api.ecommerce.dto.request.QuantityDTO;
-import com.api.ecommerce.dto.response.CartItemResponseDTO;
 import com.api.ecommerce.service.CartItemService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,32 +26,28 @@ public class CartItemRestController {
 	@Autowired
 	private CartItemService service;
 	
-//	@Operation(summary = "Retrieve a cart item by its External ID", description = "API returns the cart Item by the External ID")
-//	@ApiResponses({
-//		@ApiResponse(responseCode = "200", description = "Cart Item retrieved successfully!!", content = @Content(mediaType = "/application/json", schema = @Schema(implementation = CartItemResponseDTO.class))),
-//	    @ApiResponse(responseCode = "500", description = "Call failed on the Server!!")
-//	})
-//	@GetMapping("/{cartItemExternalId}")
-//	public ResponseEntity<?> retrieveCartItems(@PathVariable String cartItemExternalId){
-//		return service.retrieveCartItems(cartItemExternalId);
-//	}
-	
 	@Operation(summary = "Add quantity for a user's cart item", description = "API increases the cart item quantity and returns the updated cart item")
 	@PatchMapping("/{cartItemExternalId}/add")
+	@PreAuthorize("@userAuthorization.ownsCartItem(#p0)")
 	public ResponseEntity<?> addQuantityForCartItem(@PathVariable String cartItemExternalId, @RequestBody QuantityDTO quantityDto){
-		return service.addQuantityForCartItem(cartItemExternalId, quantityDto.getQuantity());
+		Response<?> response = service.addQuantityForCartItem(cartItemExternalId, quantityDto.getQuantity());
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Remove quantity for a user's cart item", description = "API decreases the cart item quantity and returns the updated cart item")
 	@PatchMapping("/{cartItemExternalId}/remove")
+	@PreAuthorize("@userAuthorization.ownsCartItem(#p0)")
 	public ResponseEntity<?> removeQuantityForCartItem(@PathVariable String cartItemExternalId, @RequestBody QuantityDTO quantityDto){
-		return service.removeQuantityForCartItem(cartItemExternalId, quantityDto.getQuantity());
+		Response<?> response = service.removeQuantityForCartItem(cartItemExternalId, quantityDto.getQuantity());
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Delete cart item for the user", description = "API deletes the product from user's cart")
 	@DeleteMapping("/{cartItemExternalId}")
+	@PreAuthorize("@userAuthorization.ownsCartItem(#p0)")
 	public ResponseEntity<?> removeCartItem(@PathVariable String cartItemExternalId){
-		return service.removeCartItem(cartItemExternalId);
+		Response<?> response = service.removeCartItem(cartItemExternalId);
+		return ResponseEntity.ok().body(response);
 	}
 
 }

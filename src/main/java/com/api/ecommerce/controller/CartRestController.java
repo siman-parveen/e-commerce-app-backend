@@ -1,5 +1,7 @@
 package com.api.ecommerce.controller;
 
+import com.api.ecommerce.response.Response;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.api.ecommerce.dto.request.ProductQuantityRequestDTO;
 import com.api.ecommerce.dto.response.CartResponseDTO;
@@ -27,14 +30,18 @@ public class CartRestController {
 	
 	@Operation(summary = "Retrieve User's cart by UserExternalId", description = "API retrieves the cart details of the user by User's External ID")
 	@GetMapping
+	@PreAuthorize("@userAuthorization.isCurrentUser(#p0)")
 	public ResponseEntity<?> retrieveCartForUser(@PathVariable String userExternalId) {
-		return service.retrieveCartForUser(userExternalId);
+		Response<?> response = service.retrieveCartForUser(userExternalId);
+		return ResponseEntity.ok().body(response);
 	}
 	
 	@Operation(summary = "Add a product to the User's cart", description = "API returns the cart Item by the External ID")
 	@PostMapping
+	@PreAuthorize("@userAuthorization.isCurrentUser(#p0)")
 	public ResponseEntity<?> addItemToCart(@PathVariable String userExternalId, @Valid @RequestBody ProductQuantityRequestDTO product) {
-		return service.addItemToCart(userExternalId, product.getProductExternalId(), product.getQuantity());
+		Response<?> response = service.addItemToCart(userExternalId, product.getProductExternalId(), product.getQuantity());
+		return ResponseEntity.ok().body(response);
 		
 	}
 

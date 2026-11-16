@@ -1,24 +1,28 @@
 package com.api.ecommerce.service.impl;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.api.ecommerce.dto.request.ProductQuantityRequestDTO;
+import com.api.ecommerce.dto.response.PaymentResponseDTO;
+import com.api.ecommerce.entity.*;
+import com.api.ecommerce.repo.PaymentRepo;
+import com.api.ecommerce.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.ecommerce.common.CommonConstant;
 import com.api.ecommerce.common.CommonService;
 import com.api.ecommerce.dto.request.OrderRequestDTO;
 import com.api.ecommerce.dto.response.OrderResponseDTO;
-import com.api.ecommerce.entity.Order;
-import com.api.ecommerce.entity.OrderStatus;
-import com.api.ecommerce.entity.User;
 import com.api.ecommerce.repo.OrderRepo;
 import com.api.ecommerce.response.Response;
 import com.api.ecommerce.service.OrderService;
 
 import jakarta.validation.Valid;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -29,7 +33,13 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	private CommonService commonService;
 
-	public ResponseEntity<?> retrieveOrdersForUser(String userExternalId) {
+    @Autowired
+    private PaymentService paymentService;
+
+	@Autowired
+	private PaymentRepo paymentRepo;
+
+	public Response<?> retrieveOrdersForUser(String userExternalId) {
 		Response<List<OrderResponseDTO>> response = new Response<>();
 
 		User user = commonService.findUserByExternalId(userExternalId);
@@ -37,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
 		if(user == null) {
 			response.setSuccess(false);
 	        response.setMessage(CommonConstant.NO_USER_FOUND);
-	        return ResponseEntity.ok().body(response);
+	        return response;
 		}
 
 		Optional<List<Order>> orders = orderRepo.findByUser(user);
@@ -45,19 +55,19 @@ public class OrderServiceImpl implements OrderService {
 		if (orders.isEmpty() || orders.get().isEmpty()) {
 	        response.setSuccess(false);
 	        response.setMessage("No orders found for the user!!");
-	        return ResponseEntity.ok().body(response);
+	        return response;
 	    }
 		
 		List<OrderResponseDTO> ordersDto = orders.get().stream().map((order) -> commonService.convertOrderToOrderResponseDto(order)).toList();
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDERS_RETRIEVED_SUCCESS_FOR_USER);
-		response.setData(ordersDto);
+		response.setResponseData(ordersDto);
 			
-		return ResponseEntity.ok().body(response);	
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveOrder(String orderExternalId) {
+	public Response<?> retrieveOrder(String orderExternalId) {
 		Response<OrderResponseDTO> response = new Response<>();
 		
 		Order order = commonService.findOrderByExternalId(orderExternalId);
@@ -65,31 +75,79 @@ public class OrderServiceImpl implements OrderService {
 		if(order == null) {
 			response.setSuccess(false);
 	        response.setMessage("No orders found with the given id!!");
-	        return ResponseEntity.ok().body(response);
+	        return response;
 		}
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDER_RETRIEVED_SUCCESS_FOR_USER);
-		response.setData(commonService.convertOrderToOrderResponseDto(order));
+		response.setResponseData(commonService.convertOrderToOrderResponseDto(order));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> createOrderForUser(String userExternalId, @Valid OrderRequestDTO orderRqst) {
+	public Response<?> createOrderForUser(@Valid OrderRequestDTO orderRequest) {
 		Response<OrderResponseDTO> response = new Response<>();
-		
-		Order order = commonService.convertOrderRequestDtoToOrder(orderRqst);
+		User user = commonService.findUserByExternalId(orderRequest.getUserExternalId());
+
+		if(user == null) {
+			response.setSuccess(false);
+			response.setMessage("No user found with the given id!!");
+			return response;
+		}
+
+		List<UserAddress> addresses = user.getAddress();
+		boolean isDeliveryAddressValid = addresses.stream()
+				.anyMatch(adr -> adr.getExternalId().equals(orderRequest.getDeliveryAddressExternalId()));
+
+		if (!isDeliveryAddressValid) {
+			response.setSuccess(false);
+			response.setMessage("Invalid Delivery Address for user!!");
+			return response;
+		}
+
+		List<String> invalidProductIds = new ArrayList<>();
+		List<BigDecimal> totalAmountsForProduct = new ArrayList<>();
+		List<ProductQuantityRequestDTO> orderItems = orderRequest.getOrderItems();
+		orderItems.forEach(item -> {
+			String productId = item.getProductExternalId();
+			Product product = commonService.findProductByExternalId(productId);
+			if (product == null || !product.isActive()) {
+				invalidProductIds.add(productId);
+			} else {
+				totalAmountsForProduct.add(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+			}
+		});
+
+		if (!invalidProductIds.isEmpty()) {
+			response.setSuccess(false);
+			response.setMessage(String.format("Invalid Product Ids - %s", String.join(",", invalidProductIds)));
+			return response;
+		}
+
+		BigDecimal totalAmounts = BigDecimal.ZERO;
+		for (BigDecimal amount : totalAmountsForProduct) {
+			totalAmounts = totalAmounts.add(amount);
+		}
+
+		if (totalAmounts.compareTo(orderRequest.getTotalAmount()) != 0) {
+			response.setSuccess(false);
+			response.setMessage("Wrong Order Amount.");
+			return response;
+		}
+
+		Order order = commonService.convertOrderRequestDtoToOrder(orderRequest);
 		
 		orderRepo.save(order);
 		
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDER_CREATED_SUCCESS_FOR_USER);
-		response.setData(commonService.convertOrderToOrderResponseDto(order));
+		response.setResponseData(commonService.convertOrderToOrderResponseDto(order));
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> cancelOrder(String orderExternalId) {
+	@Transactional
+	public Response<OrderResponseDTO> cancelOrder(String orderExternalId) {
 		Response<OrderResponseDTO> response = new Response<>();
 		
 		Order order = commonService.findOrderByExternalId(orderExternalId);
@@ -97,21 +155,54 @@ public class OrderServiceImpl implements OrderService {
 		if(order == null) {
 			response.setSuccess(false);
 	        response.setMessage("No orders found with the given id!!");
-	        return ResponseEntity.ok().body(response);
+	        return response;
+		}
+
+		if (order.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+			response.setSuccess(false);
+			response.setMessage("Delivered Order cannot be cancelled");
+			return response;
+		}
+		if (order.getOrderStatus().equals(OrderStatus.CANCELLED) || order.getOrderStatus().equals(OrderStatus.RETURNED)) {
+			response.setSuccess(false);
+			response.setMessage("Order is already cancelled or returned");
+			return response;
+		}
+
+		Optional<Payment> paymentOp = paymentRepo.findByOrder_EntityId(order.getEntityId());
+
+		if (paymentOp.isPresent()) {
+			Payment payment = paymentOp.get();
+			PaymentStatus status = payment.getPaymentStatus();
+			if (status.equals(PaymentStatus.REFUNDED)) {
+				response.setSuccess(false);
+				response.setMessage("Payment already refunded for this order");
+				return response;
+			}
+			if (status.equals(PaymentStatus.SUCCESS)) {
+				payment.setPaymentStatus(PaymentStatus.REFUNDED);
+				commonService.releaseStockForOrderItems(order.getOrderItems());
+				order.setOrderStatus(OrderStatus.CANCELLED);
+				payment.setOrder(order);
+				paymentRepo.save(payment);
+				orderRepo.save(order);
+			} else {
+				order.setOrderStatus(OrderStatus.CANCELLED);
+				orderRepo.save(order);
+			}
+		} else {
+			order.setOrderStatus(OrderStatus.CANCELLED);
+			orderRepo.save(order);
 		}
 		
-		order.setOrderStatus(OrderStatus.CANCELLED);
-		
-		orderRepo.save(order);
-		
-		//orderRepo.deleteById(order.getEntityId());
 		response.setSuccess(true);
 		response.setMessage(CommonConstant.ORDER_DELETED_SUCCESS_FOR_USER);
+		response.setResponseData(commonService.convertOrderToOrderResponseDto(order));
 
-		return ResponseEntity.ok().body(response);
+		return response;
 	}
 
-	public ResponseEntity<?> retrieveAllOrders() {
+	public Response<?> retrieveAllOrders() {
 		Response<List<OrderResponseDTO>> response = new Response<>();
 
 		List<Order> orders = orderRepo.findAll();
@@ -119,19 +210,19 @@ public class OrderServiceImpl implements OrderService {
 		if (orders.isEmpty()) {
 	        response.setSuccess(false);
 	        response.setMessage("No orders made yet!!");
-	        return ResponseEntity.ok().body(response);
+	        return response;
 	    }
 		
 		List<OrderResponseDTO> ordersDto = orders.stream().map(order -> commonService.convertOrderToOrderResponseDto(order)).toList();
 				
 		response.setSuccess(true);
 		response.setMessage("Orders retrieved successfully");
-		response.setData(ordersDto);
+		response.setResponseData(ordersDto);
 			
-		return ResponseEntity.ok().body(response);	
+		return response;
 	}
 
-	public ResponseEntity<?> updateOrderStatus(String orderExternalId, String status) {
+	public Response<?> updateOrderStatus(String orderExternalId, String status) {
 		Response<OrderResponseDTO> response = new Response<>();
 		
 		Order order = commonService.findOrderByExternalId(orderExternalId);
@@ -139,7 +230,7 @@ public class OrderServiceImpl implements OrderService {
 		if(order == null) {
 			response.setSuccess(false);
 	        response.setMessage("No orders found with the given id!!");
-	        return ResponseEntity.ok().body(response);
+	        return response;
 		}
 		
 		try {
@@ -157,7 +248,7 @@ public class OrderServiceImpl implements OrderService {
 	        response.setMessage("Status is not valid!!");
 		}
 		
-		return ResponseEntity.ok().body(response);
+		return response;
 		
 	}
 

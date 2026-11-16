@@ -1,9 +1,10 @@
 package com.api.ecommerce.service;
 
-import org.springframework.http.ResponseEntity;
+import com.api.ecommerce.response.Response;
+
 
 public interface OrderItemService {
 	
-	public ResponseEntity<?> retrieveOrderItemForOrder(String orderExternalId);
+	public Response<?> retrieveOrderItemForOrder(String orderExternalId);
 
 }

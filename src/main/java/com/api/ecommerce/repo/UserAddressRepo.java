@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.api.ecommerce.entity.UserAddress;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface UserAddressRepo extends JpaRepository<UserAddress, Long> {
 
 	public Optional<UserAddress> findByExternalId(String userExternalId);

@@ -15,8 +15,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Data;
 
 @Entity
+@Data
 public class OrderItem {
 	
     @Id
@@ -68,127 +70,5 @@ public class OrderItem {
 
     private BigDecimal refundedAmount;
     private LocalDateTime returnDate;
-	
-	public OrderItem() {}
-
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public Order getOrder() {
-		return order;
-	}
-
-	public void setOrder(Order order) {
-		this.order = order;
-	}
-
-	public Product getProduct() {
-		return product;
-	}
-
-	public void setProduct(Product product) {
-		this.product = product;
-	}
-
-	public Integer getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
-	}
-
-	public BigDecimal getUnitPrice() {
-		return unitPrice;
-	}
-
-	public void setUnitPrice(BigDecimal unitPrice) {
-		this.unitPrice = unitPrice;
-	}
-
-	public BigDecimal getDiscountAmount() {
-		return discountAmount;
-	}
-
-	public void setDiscountAmount(BigDecimal discountAmount) {
-		this.discountAmount = discountAmount;
-	}
-
-	public BigDecimal getTaxAmount() {
-		return taxAmount;
-	}
-
-	public void setTaxAmount(BigDecimal taxAmount) {
-		this.taxAmount = taxAmount;
-	}
-
-	public BigDecimal getTotalPrice() {
-		return totalPrice;
-	}
-
-	public void setTotalPrice(BigDecimal totalPrice) {
-		this.totalPrice = totalPrice;
-	}
-
-	public LocalDateTime getDeliveryDate() {
-		return deliveryDate;
-	}
-
-	public void setDeliveryDate(LocalDateTime deliveryDate) {
-		this.deliveryDate = deliveryDate;
-	}
-
-	public DeliveryStatus getDeliveryStatus() {
-		return deliveryStatus;
-	}
-
-	public void setDeliveryStatus(DeliveryStatus deliveryStatus) {
-		this.deliveryStatus = deliveryStatus;
-	}
-
-	public Boolean getReturnRequested() {
-		return returnRequested;
-	}
-
-	public void setReturnRequested(Boolean returnRequested) {
-		this.returnRequested = returnRequested;
-	}
-
-	public ReturnStatus getReturnStatus() {
-		return returnStatus;
-	}
-
-	public void setReturnStatus(ReturnStatus returnStatus) {
-		this.returnStatus = returnStatus;
-	}
-
-	public BigDecimal getRefundedAmount() {
-		return refundedAmount;
-	}
-
-	public void setRefundedAmount(BigDecimal refundedAmount) {
-		this.refundedAmount = refundedAmount;
-	}
-
-	public LocalDateTime getReturnDate() {
-		return returnDate;
-	}
-
-	public void setReturnDate(LocalDateTime returnDate) {
-		this.returnDate = returnDate;
-	}
 
 }

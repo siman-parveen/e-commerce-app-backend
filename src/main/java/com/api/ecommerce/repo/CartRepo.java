@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.api.ecommerce.entity.Cart;
 import com.api.ecommerce.entity.User;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface CartRepo extends JpaRepository<Cart, Long> {
 	
 	public Optional<Cart> findByUser(User user);
